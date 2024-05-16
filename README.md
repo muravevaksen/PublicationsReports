@@ -1,3 +1,3 @@
-v0.1 - add postgresql
+v0.1 - added postgresql
      - parse (scrapy) for scholar.google.com
      - initial version of the model
