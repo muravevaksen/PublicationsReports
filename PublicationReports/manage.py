@@ -3,6 +3,9 @@
 import os
 import sys
 
+# python manage.py migrate PublicationReports
+# python manage.py makemigrations PublicationReports
+# python manage.py runserver
 
 def main():
     """Run administrative tasks."""
