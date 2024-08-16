@@ -1,7 +1,7 @@
 from django.db import models
 
 class Publications(models.Model):
-    id = models.IntegerField(max_length=5, primary_key=True)
+    id = models.InlotegerField(max_length=5, primary_key=True)
     title = models.CharField(max_length=1000)
     year = models.IntegerField(max_length=4)
     number = models.CharField(max_length=50)
