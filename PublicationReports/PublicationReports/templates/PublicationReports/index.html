@@ -2,8 +2,11 @@
 <html>
 <body>
     <header>
-        <h1>че то тут есть</h1>
+        <h1>text:
+            {% for bb in PublicationReports %}
+             {{ bb.tittle }}
+            {% endfor %}
+        </h1>
     </header>
-    </div>
 </body>
 </html>
