@@ -10,6 +10,7 @@ class PublParseSpiderSpider(CrawlSpider):
     allowed_domains = ["scholar.google.com"]
     id_author = "9c_OePYAAAAJ"
     start_urls = ["https://scholar.google.com/citations?view_op=list_works&hl=ru&hl=ru&user=9c_OePYAAAAJ&pagesize=100"]
+    # добавить параметр для перешагивания по страницам
 
     rules = (Rule(LinkExtractor(restrict_xpaths="//td[@class='gsc_a_t']/a"), callback="parse_item", follow=True),)
 
