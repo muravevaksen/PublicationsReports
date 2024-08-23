@@ -1,12 +1,27 @@
 <!DOCTYPE html>
 <html>
 <body>
-    <header>
-        <h1>text:
-            {% for bb in PublicationReports %}
-             {{ bb.tittle }}
+<style>
+th, td {
+    border: 1px solid black;
+  border-collapse: collapse;
+}
+</style>
+<table>
+  <tr>
+    <th>Автор</th>
+    <th>Кафедра</th>
+    <th>Количество публикаций</th>
+  </tr>
+  <tr>
+    {% for author in authors %}
+    <td>{{ author.name }}</td>
+    <td>{{ author.departament }}</td>
+    <td>посчитать количество пбуликаций по автору</td>
+    <tr>
             {% endfor %}
-        </h1>
-    </header>
+    <br>
+  </tr>
+</table>
 </body>
 </html>

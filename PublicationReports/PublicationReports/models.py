@@ -24,6 +24,3 @@ class Author(models.Model):
 class Departament(models.Model):
     id = models.IntegerField(max_length=5, primary_key=True)
     name = models.CharField(max_length=200)
-
-class Meta:
-    ordering = ('-name',)
