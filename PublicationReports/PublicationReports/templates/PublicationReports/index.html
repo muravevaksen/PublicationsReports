@@ -12,10 +12,19 @@
     <td>{{ author.name }}</td>
     <td>{{ author.departament }}</td>
     <td>посчитать количество пбуликаций по автору</td>
-    <tr>
-            {% endfor %}
-    <br>
+    <tr>{% endfor %}<br>
   </tr>
 </table>
-<script src="{% static 'bb/index.js' %}"></script>
+<form action="{% url 'create_teacher' %}" method="post">
+    {% csrf_token %}
+    <button type="submit">Добавить преподавателя</button>
+</form>
+<form action="{% url 'login' %}" method="post">
+    {% csrf_token %}
+    <button type="submit">Войти</button>
+</form>
+<form action="{% url 'logout' %}" method="post">
+    {% csrf_token %}
+    <button type="submit">Выйти</button>
+</form>
 {% endblock body_content %}
