@@ -7,7 +7,7 @@ class PublicationForm(ModelForm):
         model = PublicationModel
         fields = "__all__"
 
-class AuthorModel(ModelForm):
+class AuthorForm(ModelForm):
      class Meta:
          model = AuthorModel
          fields = "__all__"

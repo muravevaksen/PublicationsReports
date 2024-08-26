@@ -1,4 +1,5 @@
 from django.db import models
+
 class Publication(models.Model):
     id = models.IntegerField(max_length=5, primary_key=True)
     title = models.CharField(max_length=1000)

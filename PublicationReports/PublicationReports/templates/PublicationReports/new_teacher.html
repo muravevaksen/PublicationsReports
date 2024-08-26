@@ -1,0 +1,9 @@
+{% extends 'PublicationReports/root.html' %}
+
+{% block body_content %}
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="Добавить преподавателя">
+</form>
+{% endblock body_content %}

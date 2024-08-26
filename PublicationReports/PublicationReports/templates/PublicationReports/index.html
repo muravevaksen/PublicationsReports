@@ -1,12 +1,6 @@
-<!DOCTYPE html>
-<html>
-<body>
-<style>
-th, td {
-    border: 1px solid black;
-  border-collapse: collapse;
-}
-</style>
+{% extends 'PublicationReports/root.html' %}
+{% load static %}
+{% block body_content %}
 <table>
   <tr>
     <th>Автор</th>
@@ -23,5 +17,5 @@ th, td {
     <br>
   </tr>
 </table>
-</body>
-</html>
+<script src="{% static 'bb/index.js' %}"></script>
+{% endblock body_content %}
