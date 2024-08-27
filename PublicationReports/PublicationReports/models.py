@@ -22,6 +22,10 @@ class Author(models.Model):
     departament = models.CharField(max_length=200)
     url = models.CharField(max_length=500)
 
+    class Meta:
+        permissions = (("can_add_teacher", "set teacher"),)
+
 class Departament(models.Model):
     id = models.IntegerField(max_length=5, primary_key=True)
     name = models.CharField(max_length=200)
+
