@@ -19,10 +19,11 @@ def create_teacher(request):
     elif request.method == 'POST':
         author_form = AuthorForm(request.POST, request.FILES)
         if author_form.is_valid():
-            new_author = AuthorForm(name=author_form.cleaned_data['name'],
-                                   job=author_form.cleaned_data['job'],
-                                   departament=author_form.cleaned_data['departament'],
-                                   url=author_form.cleaned_data['url'])
+            new_author = AuthorModel(id=author_form.cleaned_data['id'],
+                                    name=author_form.cleaned_data['name'],
+                                    job=author_form.cleaned_data['job'],
+                                    departament=author_form.cleaned_data['departament'],
+                                    url=author_form.cleaned_data['url'])
             new_author.save()
             return HttpResponseRedirect(reverse('index'))
         else:
