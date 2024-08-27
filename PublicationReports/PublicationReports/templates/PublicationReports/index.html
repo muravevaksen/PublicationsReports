@@ -3,31 +3,9 @@
 {% block body_content %}
 
 <table>
-<th><h1>Главная</h1></th>
 <th>
-    {% if perms.catalog.can_add_teacher %}
-    <form action="{% url 'create_teacher' %}" method="post">
-    {% csrf_token %}
-    <button type="submit">Добавить преподавателя</button>
-</form>
-{% endif %}
 </th>
 <th>
-<ul class="sidebar-nav">
-   {% if user.is_authenticated %}
-   <li>Вы вошли как {{ user.get_username }}</li>
-    <form action="{% url 'logout' %}" method="post">
-    {% csrf_token %}
-    <button type="submit">Выйти</button>
-    </form>
-{% else %}
-<form action="{% url 'login' %}" method="post">
-    {% csrf_token %}
-    <button type="submit">Войти</button>
-    {% endif %}
-</form>
-</th>
-</ul>
 </table>
 
 <table>
