@@ -24,5 +24,5 @@ urlpatterns = [
     path('accounts/', include('django.contrib.auth.urls')),
     path('create_teacher/', create_teacher, name="create_teacher"),
     path('', index, name="index"),
-    path('author/<int:id>/', view_author, name="view_author")
+    path('author/<int:id>/', view_author, name="view_author"),
 ]

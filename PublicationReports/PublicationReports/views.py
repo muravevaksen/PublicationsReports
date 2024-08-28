@@ -1,11 +1,11 @@
 from django.views.decorators.http import require_http_methods
 
-from .models import Author as AuthorModel
-from .forms import AuthorForm
+from .models import Author as AuthorModel, Publication as PublModel
+from .forms import AuthorForm, PublicationForm
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.http import HttpResponseRedirect, HttpResponseNotFound
-
+from scrapy.crawler import CrawlerProcess
 
 def index(request):
     return TemplateResponse(request,
@@ -37,25 +37,31 @@ def create_teacher(request):
 def view_author(request, id):
     template_name = "PublicationReports/author.html"
     try:
-        publrep = AuthorModel.objects.get(pk=id)
-    except AuthorModel.DoesNotExist:
+        author_model = AuthorModel.objects.get(pk=id)
+    except author_model.DoesNotExist:
         return HttpResponseNotFound('Не найдено')
     if request.method == 'GET':
-        publrep_form = AuthorForm(instance=publrep)
+        author_form = AuthorForm(instance=author_model)
         return TemplateResponse(request,
                                 template_name,
-                                context={'form': publrep_form})
+                                context={'form': author_form,
+                                         'publications': PublModel.objects.all()})
     elif request.method == 'POST':
-        publrep_form = AuthorForm(request.POST, request.FILES, instance=publrep)
-        if publrep_form.is_valid():
-            publrep.name = request.POST['name']
-            publrep.description = publrep_form.cleaned_data['description']
-            publrep.cost = publrep_form.cleaned_data['cost']
-            publrep.curr = publrep_form.cleaned_data['curr']
-            publrep.rubric = publrep_form.cleaned_data['rubric']
-            publrep.save()
+        author_form = AuthorForm(request.POST, request.FILES, instance=author_model)
+        if author_form.is_valid():
+            author_form.id = request.POST['id']
+            author_form.name = author_form.cleaned_data['name']
+            author_form.job = author_form.cleaned_data['job']
+            author_form.departament = author_form.cleaned_data['departament']
+            author_form.url = author_form.cleaned_data['url']
+            author_form.save()
             return HttpResponseRedirect(reverse('index'))
         else:
             return TemplateResponse(request,
                                     template_name,
-                                    context={'form': publrep_form})
+                                    context={'form': author_form})
+
+def update_publications(request):
+    process = CrawlerProcess()
+    process.crawl(carSpider, first=car_model) # Assuming that you are passing the argumment of the car_model to scrape specific models
+    process.start() # This will start your spider

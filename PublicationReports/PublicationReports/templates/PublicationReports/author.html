@@ -4,6 +4,30 @@
 <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
     {{ form.as_p }}
-    <input type="submit" value="Добавить">
+    <input type="submit" value="Сохранить">
 </form>
+
+<table>
+  <tr>
+    <th>Публикация</th>
+    <th>Год</th>
+    <th>Номер</th>
+      <th>Том</th>
+      <th>Цитирования</th>
+      <th>Страницы</th>
+      <th>Журнал</th>
+  </tr>
+  <tr>
+    {% for p in publications %}
+    <td>{{ p.title }}</td>
+    <td>{{ p.year }}</td>
+    <td>{{ p.number }}</td>
+    <td>{{ p.volume }}</td>
+    <td>{{ p.citation }}</td>
+    <td>{{ p.pages }}</td>
+    <td>{{ p.id_journal.name }}</td>
+    <tr>{% endfor %}<br>
+  </tr>
+</table>
+
 {% endblock body_content %}
