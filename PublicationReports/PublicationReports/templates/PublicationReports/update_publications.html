@@ -1,0 +1,9 @@
+{% extends 'PublicationReports/root.html' %}
+
+{% block body_content %}
+<form action="{% url 'update_publications' %}" method="get">
+    {% csrf_token %}
+    <button type="submit">обновить данные</button>
+    {% endif %}
+</form>
+{% endblock body_content %}

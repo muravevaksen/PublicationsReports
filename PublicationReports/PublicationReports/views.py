@@ -1,11 +1,11 @@
 from django.views.decorators.http import require_http_methods
-
 from .models import Author as AuthorModel, Publication as PublModel
 from .forms import AuthorForm, PublicationForm
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.http import HttpResponseRedirect, HttpResponseNotFound
 from scrapy.crawler import CrawlerProcess
+from .parse_app.parse_app.spiders.publ_parse_spider import PublParseSpiderSpider
 
 def index(request):
     return TemplateResponse(request,
@@ -62,6 +62,10 @@ def view_author(request, id):
                                     context={'form': author_form})
 
 def update_publications(request):
-    process = CrawlerProcess()
-    process.crawl(carSpider, first=car_model) # Assuming that you are passing the argumment of the car_model to scrape specific models
-    process.start() # This will start your spider
+    if request.method == 'GET':
+        process = CrawlerProcess({'FEED_FORMAT': 'json',
+                                  'FEED_URI': 'publications_list.json',
+                                  'FEED_EXPORT_ENCODING': 'utf-8'})
+        process.crawl(PublParseSpiderSpider)
+        process.start()
+        return HttpResponseRedirect(reverse('index'))
