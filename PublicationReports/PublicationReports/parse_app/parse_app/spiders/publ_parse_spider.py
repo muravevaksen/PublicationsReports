@@ -1,14 +1,13 @@
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import Rule, CrawlSpider
-import scrapy
 
 # scrapy crawl publ_parse_spider -O publications_list.json
 
 class PublParseSpiderSpider(CrawlSpider):
+
     name = "publparsespiderspider"
 
     def __init__(self, domain=None, *args, **kwargs):
-
         super(PublParseSpiderSpider, self).__init__(*args, **kwargs)
         self.start_urls = [
             f"{domain}&sortby=pubdate&cstart=0&pagesize=100",
@@ -19,7 +18,6 @@ class PublParseSpiderSpider(CrawlSpider):
         ]
 
     rules = (Rule(LinkExtractor(restrict_xpaths="//td[@class='gsc_a_t']/a"), callback="parse_item"),)
-
     def parse_item(self, response):
 
         item = {}
