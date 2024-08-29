@@ -66,6 +66,6 @@ def update_publications(request):
         process = CrawlerProcess({'FEED_FORMAT': 'json',
                                   'FEED_URI': 'publications_list.json',
                                   'FEED_EXPORT_ENCODING': 'utf-8'})
-        process.crawl(PublParseSpiderSpider)
+        process.crawl(PublParseSpiderSpider, domain="https://scholar.google.com/citations?user=9c_OePYAAAAJ&hl=ru&oi=ao")
         process.start()
         return HttpResponseRedirect(reverse('index'))
