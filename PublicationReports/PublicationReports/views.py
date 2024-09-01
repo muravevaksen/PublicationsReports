@@ -1,3 +1,5 @@
+from django.shortcuts import get_object_or_404
+from django.shortcuts import render
 from .models import Author as AuthorModel, Publication as PublModel
 from .forms import AuthorForm, PublicationForm
 from django.template.response import TemplateResponse
@@ -5,6 +7,8 @@ from django.urls import reverse
 from django.http import HttpResponseRedirect, HttpResponseNotFound
 from scrapy.crawler import CrawlerProcess
 from .parse_app.parse_app.spiders.publ_parse_spider import PublParseSpiderSpider
+import json
+import io
 
 def index(request):
     return TemplateResponse(request,
@@ -60,11 +64,18 @@ def view_author(request, id):
                                     template_name,
                                     context={'form': author_form})
 
-def update_publications(request, id=None):
+def update_publications(request, id):
     if request.method == 'GET':
+        author_model = AuthorModel.objects.get(pk=id)
         process = CrawlerProcess({'FEED_FORMAT': 'json',
-                                  'FEED_URI': 'publications_list.json',
+                                  'FEED_URI': f'PublicationReports/parse_app/publications_list_{author_model.id}.json',
                                   'FEED_EXPORT_ENCODING': 'utf-8'})
-        process.crawl(PublParseSpiderSpider, domain="https://scholar.google.com/citations?user=9c_OePYAAAAJ&hl=ru&oi=ao")
+        process.crawl(PublParseSpiderSpider, domain=author_model.url)
         process.start()
+
+        with io.open(f'PublicationReports/parse_app/publications_list_{author_model.id}.json',
+                     'r+',
+                     encoding='utf-8') as JSON:
+            publ_dict = json.load(JSON)
+
         return HttpResponseRedirect(reverse('index'))

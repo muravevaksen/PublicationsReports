@@ -10,11 +10,11 @@ class PublParseSpiderSpider(CrawlSpider):
     def __init__(self, domain=None, *args, **kwargs):
         super(PublParseSpiderSpider, self).__init__(*args, **kwargs)
         self.start_urls = [
-            f"{domain}&sortby=pubdate&cstart=0&pagesize=100",
-            f"{domain}&sortby=pubdate&cstart=101&pagesize=200",
-            f"{domain}&sortby=pubdate&cstart=201&pagesize=300",
-            f"{domain}&sortby=pubdate&cstart=301&pagesize=400",
-            f"{domain}&sortby=pubdate&cstart=401&pagesize=500"
+            f"{domain}&sortby=pubdate&cstart=0&pagesize=3",
+ #           f"{domain}&sortby=pubdate&cstart=101&pagesize=200",
+ #           f"{domain}&sortby=pubdate&cstart=201&pagesize=300",
+ #           f"{domain}&sortby=pubdate&cstart=301&pagesize=400",
+ #           f"{domain}&sortby=pubdate&cstart=401&pagesize=500"
         ]
 
     rules = (Rule(LinkExtractor(restrict_xpaths="//td[@class='gsc_a_t']/a"), callback="parse_item"),)
