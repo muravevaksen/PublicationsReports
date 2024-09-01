@@ -1,4 +1,3 @@
-from django.views.decorators.http import require_http_methods
 from .models import Author as AuthorModel, Publication as PublModel
 from .forms import AuthorForm, PublicationForm
 from django.template.response import TemplateResponse
@@ -61,7 +60,7 @@ def view_author(request, id):
                                     template_name,
                                     context={'form': author_form})
 
-def update_publications(request):
+def update_publications(request, id=None):
     if request.method == 'GET':
         process = CrawlerProcess({'FEED_FORMAT': 'json',
                                   'FEED_URI': 'publications_list.json',
