@@ -1,3 +1,4 @@
+from scrapy.exceptions import DontCloseSpider
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import Rule, CrawlSpider
 
@@ -6,11 +7,18 @@ from scrapy.spiders import Rule, CrawlSpider
 class PublParseSpiderSpider(CrawlSpider):
 
     name = "publparsespiderspider"
+    custom_settings = {
+        "REQUEST_FINGERPRINTER_IMPLEMENTATION": "2.7",
+        "FEEDS": {r"PublicationReports/parse_app/publications_list.json": {"format": "json",
+                                                                           "overwrite": True,
+                                                                           "encoding": "utf-8"}
+                  }
+    }
 
     def __init__(self, domain=None, *args, **kwargs):
         super(PublParseSpiderSpider, self).__init__(*args, **kwargs)
         self.start_urls = [
-            f"{domain}&sortby=pubdate&cstart=0&pagesize=3",
+            f"{domain}&sortby=pubdate&cstart=0&pagesize=4",
  #           f"{domain}&sortby=pubdate&cstart=101&pagesize=200",
  #           f"{domain}&sortby=pubdate&cstart=201&pagesize=300",
  #           f"{domain}&sortby=pubdate&cstart=301&pagesize=400",

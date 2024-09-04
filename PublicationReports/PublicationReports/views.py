@@ -1,14 +1,14 @@
-from django.shortcuts import get_object_or_404
-from django.shortcuts import render
+import django
+django.setup()
 from .models import Author as AuthorModel, Publication as PublModel
 from .forms import AuthorForm, PublicationForm
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.http import HttpResponseRedirect, HttpResponseNotFound
-from scrapy.crawler import CrawlerProcess
 from .parse_app.parse_app.spiders.publ_parse_spider import PublParseSpiderSpider
-import json
-import io
+import scrapy.crawler as crawler
+import multiprocess as mp
+from twisted.internet import reactor
 
 def index(request):
     return TemplateResponse(request,
@@ -66,16 +66,28 @@ def view_author(request, id):
 
 def update_publications(request, id):
     if request.method == 'GET':
-        author_model = AuthorModel.objects.get(pk=id)
-        process = CrawlerProcess({'FEED_FORMAT': 'json',
-                                  'FEED_URI': f'PublicationReports/parse_app/publications_list_{author_model.id}.json',
-                                  'FEED_EXPORT_ENCODING': 'utf-8'})
-        process.crawl(PublParseSpiderSpider, domain=author_model.url)
-        process.start()
 
-        with io.open(f'PublicationReports/parse_app/publications_list_{author_model.id}.json',
-                     'r+',
-                     encoding='utf-8') as JSON:
-            publ_dict = json.load(JSON)
+        author_model = AuthorModel.objects.get(pk=id)
+
+        def f(q):
+            try:
+                runner = crawler.CrawlerRunner()
+                deferred = runner.crawl(PublParseSpiderSpider, domain=author_model.url)
+                deferred.addBoth(lambda _: reactor.stop())
+                reactor.run()
+                q.put(None)
+            except Exception as e:
+                q.put(e)
+
+        q = mp.Queue()
+        p = mp.Process(target=f, args=(q,))
+        p.start()
+        result = q.get()
+        p.join()
+        if result is not None:
+            raise result
 
         return HttpResponseRedirect(reverse('index'))
+
+
+
