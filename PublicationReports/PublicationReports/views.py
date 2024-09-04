@@ -1,3 +1,6 @@
+import io
+import json
+
 import django
 django.setup()
 from .models import Author as AuthorModel, Publication as PublModel
@@ -66,9 +69,7 @@ def view_author(request, id):
 
 def update_publications(request, id):
     if request.method == 'GET':
-
         author_model = AuthorModel.objects.get(pk=id)
-
         def f(q):
             try:
                 runner = crawler.CrawlerRunner()
@@ -86,6 +87,11 @@ def update_publications(request, id):
         p.join()
         if result is not None:
             raise result
+
+        with io.open(f'PublicationReports/parse_app/publications_list.json',
+                     'r+',
+                     encoding='utf-8') as JSON:
+            publ_dict = json.load(JSON)
 
         return HttpResponseRedirect(reverse('index'))
 
