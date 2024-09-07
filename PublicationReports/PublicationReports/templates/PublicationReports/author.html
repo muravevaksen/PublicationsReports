@@ -18,7 +18,6 @@
     <th>Год</th>
     <th>Номер</th>
       <th>Том</th>
-      <th>Цитирования</th>
       <th>Страницы</th>
       <th>Журнал</th>
   </tr>
@@ -28,9 +27,8 @@
     <td>{{ p.year }}</td>
     <td>{{ p.number }}</td>
     <td>{{ p.volume }}</td>
-    <td>{{ p.citation }}</td>
     <td>{{ p.pages }}</td>
-    <td>{{ p.id_journal.name }}</td>
+    <td>{{ p.journal.name }}</td>
     <tr>{% endfor %}<br>
   </tr>
 </table>

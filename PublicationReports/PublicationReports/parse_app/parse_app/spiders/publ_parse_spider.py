@@ -18,7 +18,7 @@ class PublParseSpiderSpider(CrawlSpider):
     def __init__(self, domain=None, *args, **kwargs):
         super(PublParseSpiderSpider, self).__init__(*args, **kwargs)
         self.start_urls = [
-            f"{domain}&sortby=pubdate&cstart=0&pagesize=4",
+            f"{domain}&sortby=pubdate&cstart=0&pagesize=2",
  #           f"{domain}&sortby=pubdate&cstart=101&pagesize=200",
  #           f"{domain}&sortby=pubdate&cstart=201&pagesize=300",
  #           f"{domain}&sortby=pubdate&cstart=301&pagesize=400",
