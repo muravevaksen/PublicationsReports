@@ -7,7 +7,7 @@
     <input type="submit" value="Сохранить">
 </form>
 
-<form action="{% url 'update_publications' authors.id %}" method="get">
+<form action="{% url 'update_publications' author_id %}" method="get">
     {% csrf_token %}
     <button type="submit">Обновить публикации</button>
 </form>

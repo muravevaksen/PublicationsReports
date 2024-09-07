@@ -18,7 +18,7 @@
     {% for author in authors %}
       <td><a href="{% url 'view_author' author.id %}">{{ author.name }}</a> </td>
     <td>{{ author.departament.name }}</td>
-    <td>посчитать количество пбуликаций по автору</td>
+    <td>{{ publ_count }}</td>
     <tr>{% endfor %}<br>
   </tr>
 </table>

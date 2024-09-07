@@ -2,6 +2,7 @@ import io
 import json
 import django
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import Count
 from django.shortcuts import render
 
 django.setup()
@@ -17,9 +18,11 @@ from twisted.internet import reactor
 
 
 def index(request):
+    author_model = AuthorModel.objects.all()
     return TemplateResponse(request,
                             'PublicationReports/index.html',
-                            context={'authors': AuthorModel.objects.all()})
+                            context={'authors': author_model,
+                                     'publ_count': PublModel.objects.aggregate(publ_count=Count(PublModel.author))})
 
 
 def create_teacher(request):
@@ -55,7 +58,8 @@ def view_author(request, author_id):
         return TemplateResponse(request,
                                 template_name,
                                 context={'form': author_form,
-                                         'publications': PublModel.objects.filter(author=author_id)})
+                                         'publications': PublModel.objects.filter(author=author_id),
+                                         'author_id': author_id})
     elif request.method == 'POST':
         author_form = AuthorForm(request.POST, request.FILES, instance=author_model)
         if author_form.is_valid():
@@ -76,8 +80,8 @@ def update_publications(request, author_id):
         author_model = AuthorModel.objects.get(id=author_id)
     except author_model.DoesNotExist:
         return HttpResponseNotFound('Не найдено')
-    if request.method == 'GET':
 
+    if request.method == 'GET':
         # def f(q):
         #            try:
         #                runner = crawler.CrawlerRunner()
@@ -102,44 +106,53 @@ def update_publications(request, author_id):
                      encoding='utf-8') as JSON:
             publ_dict = json.load(JSON)
 
-    journal_model = JournalModel()
-    publ_model = PublModel()
+        journal_model = JournalModel()
+        publ_model = PublModel()
 
-    for p in publ_dict:
-        if JournalModel.objects.filter(name=p.get('Журнал'), publisher=p.get(
-                'Издатель')).exists():  # если в базе уже есть такая запись
-            pass  # то ниче не делаем
-        else:  # если в базе такой записи нет
-            if JournalModel.objects.exists():  # журналы - если есть записи, то берем последний номер ид и прибавляем единицу
-                journal_model.id = JournalModel.objects.last().id + 1
-            else:  # если записей в таблице нет (т. е. ид пусто) то просто берем единицу
-                journal_model.id = 1
-            if PublModel.objects.exists():  # публикации - если есть записи, то берем последний номер ид и прибавляем единицу
-                publ_model.id = PublModel.objects.last().id + 1
-            else:  # если записей в таблице нет (т. е. ид пусто) то просто берем единицу
-                publ_model.id = 1
-            # задаем журнал
-            journal_model.name = p.get('Журнал')
-            journal_model.publisher = p.get('Издатель')
-            # сохраняем модельки
-            journal_model.save(force_insert=True)
-            publ_model.save(force_insert=True)
-            # добавляем связь многие-ко-многим автор+публикация
-            author_model = AuthorModel(id=author_id)
-            publ_model = PublModel(id=publ_model.id)
-            publ_model.author.add(author_model)
-            publ_model.save()
-            # добавляем данные публикации и связь один-ко-многим с журналом
-            journal_model = JournalModel.objects.get(id=journal_model.id)
-            p1 = PublModel(id=publ_model.id,
-                           title=p.get('Название'),
-                           year=p.get('Дата публикации')[0:4],
-                           number=p.get('Номер'),
-                           volume=p.get('Том'),
-                           pages=p.get('Страницы'))
-            journal_model.publication_set.add(p1, bulk=False)
-            # увеличиваем идентификаторы
-            journal_model.id += 1
-            publ_model.id += 1
+        for p in publ_dict:
+            # если в базе уже есть такая запись журнала
+            if JournalModel.objects.filter(name=p.get('Журнал'),
+                                           publisher=p.get('Издатель')).exists():
+                # если в базе уже есть такая запись публикации
+                if PublModel.objects.filter(title=p.get('Название'),
+                                            year=p.get('Дата публикации'),
+                                            number=p.get('Номер'),
+                                            volume=p.get('Том'),
+                                            pages=p.get('Страницы')).exists():
+                    pass  # то ниче не делаем
+                else: # если журнал есть, а публикации нет
+                    pass # !дописать че тут будет!
+            else:  # если в базе нет ни журнала ни публикации
+                if JournalModel.objects.exists():  # журналы - если есть записи, то берем последний номер ид и прибавляем единицу
+                    journal_model.id = JournalModel.objects.last().id + 1
+                else:  # если записей в таблице нет (т. е. ид пусто) то просто берем единицу
+                    journal_model.id = 1
+                if PublModel.objects.exists():  # публикации - если есть записи, то берем последний номер ид и прибавляем единицу
+                    publ_model.id = PublModel.objects.last().id + 1
+                else:  # если записей в таблице нет (т. е. ид пусто) то просто берем единицу
+                    publ_model.id = 1
+                # задаем журнал
+                journal_model.name = p.get('Журнал')
+                journal_model.publisher = p.get('Издатель')
+                # сохраняем модельки
+                journal_model.save(force_insert=True)
+                publ_model.save(force_insert=True)
+                # добавляем связь многие-ко-многим автор+публикация
+                author_model = AuthorModel(id=author_id)
+                publ_model = PublModel(id=publ_model.id)
+                publ_model.author.add(author_model)
+                publ_model.save()
+                # добавляем данные публикации и связь один-ко-многим с журналом
+                journal_model = JournalModel.objects.get(id=journal_model.id)
+                p1 = PublModel(id=publ_model.id,
+                               title=p.get('Название'),
+                               year=p.get('Дата публикации')[0:4],
+                               number=p.get('Номер'),
+                               volume=p.get('Том'),
+                               pages=p.get('Страницы'))
+                journal_model.publication_set.add(p1, bulk=False)
+                # увеличиваем идентификаторы
+                journal_model.id += 1
+                publ_model.id += 1
 
-    return HttpResponseRedirect(reverse('index'))
+        return HttpResponseRedirect(reverse('index'))
