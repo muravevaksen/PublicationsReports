@@ -2,7 +2,7 @@ from django.db import models
 
 class Journal(models.Model):
     id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=200, unique=True)
+    name = models.CharField(max_length=200, unique=True, null=True)
     publisher = models.CharField(max_length=200, null=True)
 
 class Departament(models.Model):
@@ -22,7 +22,7 @@ class Author(models.Model):
 class Publication(models.Model):
     id = models.AutoField(primary_key=True)
     title = models.CharField(max_length=200)
-    year = models.IntegerField(max_length=2, null=True)
+    year = models.IntegerField(null=True)
     number = models.CharField(max_length=20, null=True)
     volume = models.CharField(max_length=20, null=True)
     pages = models.CharField(max_length=20, null=True)
