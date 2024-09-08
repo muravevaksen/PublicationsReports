@@ -4,7 +4,6 @@ import django
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Count
 from django.shortcuts import render
-
 django.setup()
 from .models import Author as AuthorModel, Publication as PublModel, Journal as JournalModel
 from .forms import AuthorForm, PublicationForm, JournalForm
@@ -16,13 +15,23 @@ import scrapy.crawler as crawler
 import multiprocess as mp
 from twisted.internet import reactor
 
-
 def index(request):
     author_model = AuthorModel.objects.all()
+    # считаем количество публикаций каждого автора
+    publ_count = AuthorModel.objects.annotate(num_publ=Count("publication"))
+    # подготавливаем данные для вывода
+    id_author = [x.id for x in author_model]
+    name = [x.name for x in author_model]
+    depart = [x.departament for x in author_model]
+    pcount = [str(x.num_publ) for x in publ_count]
+    pcount.reverse() # обратная сортировочка
     return TemplateResponse(request,
                             'PublicationReports/index.html',
                             context={'authors': author_model,
-                                     'publ_count': PublModel.objects.aggregate(publ_count=Count(PublModel.author))})
+                                     'id_author': id_author,
+                                     'name': name,
+                                     'depart': depart,
+                                     'pcount': pcount})
 
 
 def create_teacher(request):

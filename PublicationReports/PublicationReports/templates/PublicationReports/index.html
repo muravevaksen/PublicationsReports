@@ -3,24 +3,49 @@
 {% block body_content %}
 
 <table>
-<th>
-</th>
-<th>
-</table>
-
-<table>
-  <tr>
-    <th>Автор</th>
-    <th>Кафедра</th>
-    <th>Количество публикаций</th>
-  </tr>
-  <tr>
-    {% for author in authors %}
-      <td><a href="{% url 'view_author' author.id %}">{{ author.name }}</a> </td>
-    <td>{{ author.departament.name }}</td>
-    <td>{{ publ_count }}</td>
-    <tr>{% endfor %}<br>
-  </tr>
+    <tr>
+        <td>
+            <table>
+                <tr>
+                    <th>ФИО</th>
+                </tr>
+                <tr>
+                    {% for author in authors %}
+                    <td><a href="{% url 'view_author' author.id %}">{{ author.name }}</a></td>
+                <tr>
+                </tr>
+                {% endfor %}
+            </table>
+        </td>
+        <td>
+            <table>
+                <tr>
+                    <th>Кафедра</th>
+                </tr>
+                <tr>
+                    {% for d in depart %}
+                    <td>{{ d.name }}</td>
+                <tr>
+                </tr>
+                {% endfor %}
+            </table>
+        </td>
+        <td>
+            <table>
+                <tr>
+                    <th>Количество публикаций</th>
+                </tr>
+                <tr>
+                    {% for p in pcount %}
+                    <td>
+                        {{ p }}
+                    </td>
+                <tr>
+                </tr>
+                {% endfor %}
+            </table>
+        </td>
+    </tr>
 </table>
 
 {% endblock body_content %}
