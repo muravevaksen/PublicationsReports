@@ -14,6 +14,7 @@ from .parse_app.parse_app.spiders.publ_parse_spider import PublParseSpiderSpider
 import scrapy.crawler as crawler
 import multiprocess as mp
 from twisted.internet import reactor
+import pandas as pd
 
 def index(request):
     author_model = AuthorModel.objects.all()
@@ -165,3 +166,6 @@ def update_publications(request, author_id):
                 publ_model.id += 1
 
         return HttpResponseRedirect(reverse('index'))
+
+def export_to_excel(request, author_id):
+    return HttpResponseRedirect(reverse('index'))
