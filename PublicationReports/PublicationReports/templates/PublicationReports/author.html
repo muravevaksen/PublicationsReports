@@ -4,17 +4,17 @@
 <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
     {{ form.as_p }}
-    <input type="submit" value="Сохранить">
+    <input type="submit" class="btn btn-primary d-inline-flex align-items-center" value="Сохранить">
 </form>
 
 <form action="{% url 'update_publications' author_id %}" method="get">
     {% csrf_token %}
-    <button type="submit">Обновить публикации</button>
+    <button class="btn btn-primary d-inline-flex align-items-center" type="submit">Обновить публикации</button>
 </form>
 
 <form action="{% url 'export_to_excel' author_id %}" method="get">
     {% csrf_token %}
-    <button type="submit">Выгрузить в Excel</button>
+    <button type="submit" class="btn btn-primary d-inline-flex align-items-center" >Выгрузить в Excel</button>
 </form>
 
 <table>
