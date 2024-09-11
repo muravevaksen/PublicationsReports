@@ -26,5 +26,6 @@ class Publication(models.Model):
     number = models.CharField(max_length=20, null=True)
     volume = models.CharField(max_length=20, null=True)
     pages = models.CharField(max_length=20, null=True)
+    citation = models.IntegerField(null=True)
     author = models.ManyToManyField(Author)
     journal = models.ForeignKey(Journal, on_delete=models.CASCADE, null=True)

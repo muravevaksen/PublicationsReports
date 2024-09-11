@@ -1,6 +1,7 @@
 {% extends 'PublicationReports/root.html' %}
 
 {% block body_content %}
+
 <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
     {{ form.as_p }}
@@ -14,27 +15,37 @@
 
 <form action="{% url 'export_to_excel' author_id %}" method="get">
     {% csrf_token %}
-    <button type="submit" class="btn btn-primary d-inline-flex align-items-center" >Выгрузить в Excel</button>
+    <button type="submit" class="btn btn-primary d-inline-flex align-items-center">Выгрузить в Excel</button>
 </form>
 
-<table>
-  <tr>
-    <th>Публикация</th>
-    <th>Год</th>
-    <th>Номер</th>
-      <th>Том</th>
-      <th>Страницы</th>
-      <th>Журнал</th>
-  </tr>
-  <tr>
-    {% for p in publications %}
-    <td>{{ p.title }}</td>
-    <td>{{ p.year }}</td>
-    <td>{{ p.number }}</td>
-    <td>{{ p.volume }}</td>
-    <td>{{ p.pages }}</td>
-    <td>{{ p.journal.name }}</td>
+
+<table class="table table-bordered">
+    <tr>
+        <th>№</th>
+        <th>Публикация</th>
+        <th>Год</th>
+        <th>Номер</th>
+        <th>Том</th>
+        <th>Страницы</th>
+        <th>Цитирования</th>
+        <th>Журнал</th>
+
+    </tr>
+    <tr>
+        {% for p in publications %}
+        <td>{{ forloop.counter }}</td>
+        <td>{{ p.title }}</td>
+        <td>{{ p.year }}</td>
+        {% if p.number == 'None' %}
+        <td>''</td>
+        {% else %}
+        <td> {{ p.number }}</td>
+        {% endif %}
+        <td>{{ p.volume }}</td>
+        <td>{{ p.pages }}</td>
+        <td>{{ p.citation }}</td>
+        <td>{{ p.journal.name }}</td>
     <tr>{% endfor %}<br>
-  </tr>
+    </tr>
 </table>
 {% endblock body_content %}
