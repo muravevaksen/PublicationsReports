@@ -9,22 +9,30 @@
     {% bootstrap_javascript %}
 </head>
 <body>
-<div class="container" >
-    <ul class="nav bg-info">
-        <li class="nav-item">
-            <a class="nav-link link-light" href="/">Преподаватели</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link link-light" href="/departaments">Кафедры</a>
-        </li>
-        {% if user.is_authenticated %}
-        <b> {{ user.get_username }}</b>
-        <a class="nav-link link-light" href="accounts/logout">Выйти</a>
-        {% else %}
-        <a class="nav-link link-light" href="accounts/login">Войти</a>
-        {% endif %}
-        </th>
-    </ul>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item active">
+                <a class="nav-link" href="/">Преподаватели</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link link-light" href="/departaments">Кафедры</a>
+            </li>
+        </ul>
+    </div>
+    <form class="form-inline">
+        <ul class="navbar-nav mr-auto">
+            {% if user.is_authenticated %}
+            <b class="nav-link link-light"> {{ user.get_username }}</b>
+            <a class="btn btn-outline-light my-2 my-sm-0" href="accounts/logout">Выйти</a>
+            {% else %}
+            <a class="btn btn-outline-light my-2 my-sm-0" href="accounts/login">Войти</a>
+            {% endif %}
+        </ul>
+    </form>
+</nav>
+<div class="p-3 mb-2 bg-light text-dark">
     {% block body_content %}
     {% endblock body_content %}
     {% block content %}

@@ -29,22 +29,39 @@
         <th>Страницы</th>
         <th>Цитирования</th>
         <th>Журнал</th>
-
+        <th>Издатель</th>
     </tr>
     <tr>
         {% for p in publications %}
         <td>{{ forloop.counter }}</td>
         <td>{{ p.title }}</td>
         <td>{{ p.year }}</td>
-        {% if p.number == 'None' %}
-        <td>''</td>
+        {% if p.number is null %}
+        <td></td>
         {% else %}
         <td> {{ p.number }}</td>
         {% endif %}
-        <td>{{ p.volume }}</td>
-        <td>{{ p.pages }}</td>
+        {% if p.volume is null %}
+        <td></td>
+        {% else %}
+        <td> {{ p.volume }}</td>
+        {% endif %}
+        {% if p.pages is null %}
+        <td></td>
+        {% else %}
+        <td> {{ p.pages }}</td>
+        {% endif %}
         <td>{{ p.citation }}</td>
-        <td>{{ p.journal.name }}</td>
+        {% if p.journal.name is null %}
+        <td></td>
+        {% else %}
+        <td> {{ p.journal.name }}</td>
+        {% endif %}
+        {% if p.journal.publisher is null %}
+        <td></td>
+        {% else %}
+        <td> {{ p.journal.publisher }}</td>
+        {% endif %}
     <tr>{% endfor %}<br>
     </tr>
 </table>
