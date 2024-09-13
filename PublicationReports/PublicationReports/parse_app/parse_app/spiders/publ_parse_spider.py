@@ -31,8 +31,8 @@ class PublParseSpiderSpider(CrawlSpider):
     def parse_item(self, response):
 
         item = {}
-        item["Название"] = response.xpath('//a[@class="gsc_oci_title_link"]/text()').get()
-        # вытаскиваем количество публикаций (очень сложно)
+        item["Название"] = response.xpath('//div[@id="gsc_oci_title"]/text()').get()
+        # вытаскиваем количество цитирований (очень сложно)
         citation = response.xpath('//div[@id="gsc_vcpb"]//div[@class="gsc_oci_value"]/div/a').getall()
         if len(str(citation)) > 2:
             cit = citation[0]

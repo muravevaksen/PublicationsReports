@@ -3,7 +3,10 @@
 
 {% block body_content %}
 {% if perms.catalog.can_add_teacher %}
-<a class="link-dark" href="/create_teacher">Добавить преподавателя</a>
+<form action="{% url 'create_teacher' %}" method="get">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-primary d-inline-flex align-items-center">Добавить преподавателя</button>
+</form>
 {% endif %}
 <table>
     <tr>
@@ -14,7 +17,8 @@
                 </tr>
                 <tr>
                     {% for author in authors %}
-                    <td><a href="{% url 'view_author' author.id %}">{{ author.name }}</a></td>
+                    <td><a class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover"
+                           href="{% url 'view_author' author.id %}">{{ author.name }}</a></td>
                 <tr>
                 </tr>
                 {% endfor %}

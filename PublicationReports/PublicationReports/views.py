@@ -113,7 +113,6 @@ def update_publications(request, author_id):
             raise result
 
     # считываем файлик json
-
     with io.open(f'PublicationReports/parse_app/publications_list.json',
                  'r+',
                  encoding='utf-8') as JSON:
@@ -123,27 +122,62 @@ def update_publications(request, author_id):
     publ_model = PublModel()
 
     for p in publ_dict:
-        # если в базе уже есть такая запись журнала
+        # *----------------- Обновление данных------------------------------*
+        # если в базе уже есть такая запись журнала (полная сверка)
         if JournalModel.objects.filter(name=p.get('Журнал'),
                                        publisher=p.get('Издатель')).exists():
-            # если в базе уже есть такая запись публикации
+            # если в базе уже есть такая запись публикации (полная сверка)
             if PublModel.objects.filter(title=p.get('Название'),
                                         year=p.get('Дата публикации')[0:4],
                                         number=p.get('Номер'),
                                         volume=p.get('Том'),
                                         pages=p.get('Страницы'),
-                                        citation=p.get('Цитирования')).exists():
-                pass  # то ниче не делаем
+                                        citation=p.get('Цитирования'),
+                                        author=AuthorModel.objects.get(id=author_model.id)).exists():
+                pass  # ничего не обновляем (повтор)
+            # если в базе уже есть такая запись публикации (но не совпадает с автором)
+            elif PublModel.objects.filter(title=p.get('Название'),
+                                          year=p.get('Дата публикации')[0:4],
+                                          number=p.get('Номер'),
+                                          volume=p.get('Том'),
+                                          pages=p.get('Страницы'),
+                                          citation=p.get('Цитирования')).exists():
+                # то добавляем связь текущего автора и публикации
+                author_model = AuthorModel(id=author_id)
+                publ_model = PublModel.objects.filter(title=p.get('Название'),
+                                                      year=p.get('Дата публикации')[0:4],
+                                                      number=p.get('Номер'),
+                                                      volume=p.get('Том'),
+                                                      pages=p.get('Страницы'),
+                                                      citation=p.get('Цитирования'))
+                publ_model.author.add(author_model)
             else:  # если журнал есть, а публикации нет
-                pass  # !дописать че тут будет!
-        else:  # если в базе нет ни журнала ни публикации
+                # добавляем связь многие-ко-многим автор+публикация
+                publ_model.save(force_insert=True)
+                author_model = AuthorModel(id=author_id)
+                publ_model = PublModel(id=publ_model.id)
+                publ_model.author.add(author_model)
+                publ_model.save()
+                # добавляем данные публикации и связь один-ко-многим с журналом
+                journal_model = JournalModel.objects.filter(name=p.get('Журнал'),
+                                                            publisher=p.get('Издатель'))
+                p1 = PublModel(id=publ_model.id,
+                               title=p.get('Название'),
+                               year=p.get('Дата публикации')[0:4],
+                               number=p.get('Номер'),
+                               volume=p.get('Том'),
+                               pages=p.get('Страницы'),
+                               citation=p.get('Цитирования'))
+                journal_model.publication_set.add(p1, bulk=False)
+        # *----------------- Новые записи ------------------------------*
+        else:
             if JournalModel.objects.exists():  # журналы - если есть записи, то берем последний номер ид и прибавляем единицу
                 journal_model.id = JournalModel.objects.last().id + 1
-            else:  # если записей в таблице нет (т. е. ид пусто) то просто берем единицу
+            else:  # если записей в таблице нет (т. е. ид пусто), то просто берем единицу
                 journal_model.id = 1
             if PublModel.objects.exists():  # публикации - если есть записи, то берем последний номер ид и прибавляем единицу
                 publ_model.id = PublModel.objects.last().id + 1
-            else:  # если записей в таблице нет (т. е. ид пусто) то просто берем единицу
+            else:  # если записей в таблице нет (т. е. ид пусто), то просто берем единицу
                 publ_model.id = 1
             # задаем журнал
             journal_model.name = p.get('Журнал')
