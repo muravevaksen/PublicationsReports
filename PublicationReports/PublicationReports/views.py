@@ -1,10 +1,7 @@
 import io
 import json
 import django
-from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Count
-from django.shortcuts import render
-
 django.setup()
 from .models import Author as AuthorModel, Publication as PublModel, Journal as JournalModel
 from .forms import AuthorForm, PublicationForm, JournalForm
@@ -15,8 +12,6 @@ from .parse_app.parse_app.spiders.publ_parse_spider import PublParseSpiderSpider
 import scrapy.crawler as crawler
 import multiprocess as mp
 from twisted.internet import reactor
-import pandas as pd
-
 
 def index(request):
     author_model = AuthorModel.objects.all()
@@ -93,24 +88,24 @@ def update_publications(request, author_id):
     except author_model.DoesNotExist:
         return HttpResponseNotFound('Не найдено')
 
-    if request.method == 'GET':
-        def f(q):
-            try:
-                runner = crawler.CrawlerRunner()
-                deferred = runner.crawl(PublParseSpiderSpider, domain=author_model.url)
-                deferred.addBoth(lambda _: reactor.stop())
-                reactor.run()
-                q.put(None)
-            except Exception as e:
-                q.put(e)
+    #if request.method == 'GET':
+    #    def f(q):
+    #        try:
+    #            runner = crawler.CrawlerRunner()
+    #            deferred = runner.crawl(PublParseSpiderSpider, domain=author_model.url)
+    #            deferred.addBoth(lambda _: reactor.stop())
+    #            reactor.run()
+    #            q.put(None)
+    #        except Exception as e:
+    #            q.put(e)
 
-        q = mp.Queue()
-        p = mp.Process(target=f, args=(q,))
-        p.start()
-        result = q.get()
-        p.join()
-        if result is not None:
-            raise result
+    #    q = mp.Queue()
+    #    p = mp.Process(target=f, args=(q,))
+    #    p.start()
+    #    result = q.get()
+    #    p.join()
+    #    if result is not None:
+    #        raise result
 
     # считываем файлик json
     with io.open(f'PublicationReports/parse_app/publications_list.json',
@@ -143,14 +138,17 @@ def update_publications(request, author_id):
                                           pages=p.get('Страницы'),
                                           citation=p.get('Цитирования')).exists():
                 # то добавляем связь текущего автора и публикации
-                author_model = AuthorModel(id=author_id)
-                publ_model = PublModel.objects.filter(title=p.get('Название'),
-                                                      year=p.get('Дата публикации')[0:4],
-                                                      number=p.get('Номер'),
-                                                      volume=p.get('Том'),
-                                                      pages=p.get('Страницы'),
-                                                      citation=p.get('Цитирования'))
+                author_model = AuthorModel.objects.get(id=author_id)
+                author_model.save()
+                p1 = PublModel.objects.filter(title=p.get('Название'),
+                                              year=p.get('Дата публикации')[0:4],
+                                              number=p.get('Номер'),
+                                              volume=p.get('Том'),
+                                              pages=p.get('Страницы'),
+                                              citation=p.get('Цитирования'))
+                publ_model = PublModel.objects.get(id=p1[0].id)
                 publ_model.author.add(author_model)
+                publ_model.save()
             else:  # если журнал есть, а публикации нет
                 # добавляем связь многие-ко-многим автор+публикация
                 publ_model.save(force_insert=True)
@@ -159,8 +157,9 @@ def update_publications(request, author_id):
                 publ_model.author.add(author_model)
                 publ_model.save()
                 # добавляем данные публикации и связь один-ко-многим с журналом
-                journal_model = JournalModel.objects.filter(name=p.get('Журнал'),
-                                                            publisher=p.get('Издатель'))
+                j1 = JournalModel.objects.filter(name=p.get('Журнал'),
+                                            publisher=p.get('Издатель'))
+                journal_model = JournalModel.objects.get(id=j1[0].id)
                 p1 = PublModel(id=publ_model.id,
                                title=p.get('Название'),
                                year=p.get('Дата публикации')[0:4],
@@ -169,6 +168,7 @@ def update_publications(request, author_id):
                                pages=p.get('Страницы'),
                                citation=p.get('Цитирования'))
                 journal_model.publication_set.add(p1, bulk=False)
+                publ_model.id += 1
         # *----------------- Новые записи ------------------------------*
         else:
             if JournalModel.objects.exists():  # журналы - если есть записи, то берем последний номер ид и прибавляем единицу
@@ -205,7 +205,6 @@ def update_publications(request, author_id):
             publ_model.id += 1
 
     return HttpResponseRedirect(reverse('index'))
-
 
 def export_to_excel(request, author_id):
     return HttpResponseRedirect(reverse('index'))
