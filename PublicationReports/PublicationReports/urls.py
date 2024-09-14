@@ -27,6 +27,6 @@ urlpatterns = [
     path('author/<int:author_id>/', view_author, name="view_author"),
     path('author/<int:author_id>/update/', update_publications, name="update_publications"),
     path('author/<int:author_id>/export/', export_to_excel, name="export_to_excel"),
-    path('author/<int:author_id>/edit/', edit_publications, name="edit_publications"),
+    path('author/<int:author_id>/edit/<int:publ_id>', edit_publications, name="edit_publications"),
     path('departaments', departaments, name="departaments"),
 ]

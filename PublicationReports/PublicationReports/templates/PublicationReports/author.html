@@ -25,22 +25,20 @@
     </form>
     <form action="{% url 'update_publications' author_id %}" method="get">
         {% csrf_token %}
-        <button class="btn btn-primary d-inline-flex align-items-center" type="submit">Обновление публикаций из Google Scholar</button>
-    </form>
-    <form action="{% url 'edit_publications' author_id %}" method="get">
-        {% csrf_token %}
-        <button type="submit" class="btn btn-primary d-inline-flex align-items-center">Редактирование публикаций вручную</button>
+
+        <button class="btn btn-primary d-inline-flex align-items-center" type="submit">Обновить
+        </button>
     </form>
     <form action="{% url 'export_to_excel' author_id %}" method="get">
         {% csrf_token %}
-        <button type="submit" class="btn btn-primary d-inline-flex align-items-center">Выгрузить в Excel</button>
+        <a href="{% url 'export_to_excel' 1 %}"><img src="/static/img/excel_icon.png" class="img-fluid" alt="Excel"></a>
     </form>
 </table>
 
 <table class="table table-bordered">
     <tr>
         <th>№</th>
-        <th>Публикация</th>
+        <th>Название</th>
         <th>Год</th>
         <th>Номер</th>
         <th>Том</th>
@@ -48,6 +46,7 @@
         <th>Цитирования</th>
         <th>Журнал</th>
         <th>Издатель</th>
+        <th></th>
     </tr>
     <tr>
         {% for p in publications %}
@@ -80,6 +79,7 @@
         {% else %}
         <td> {{ p.journal.publisher }}</td>
         {% endif %}
+        <td><a href="{% url 'edit_publications' 1 p.id %}"><img src="/static/img/edit_icon.png" class="img-fluid" alt="Edit"></a></td>
     <tr>{% endfor %}<br>
     </tr>
 </table>

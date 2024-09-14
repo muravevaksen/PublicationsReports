@@ -175,11 +175,11 @@ def update_publications(request, author_id):
         else:
             if JournalModel.objects.exists():  # журналы - если есть записи, то берем последний номер ид и прибавляем единицу
                 journal_model.id = JournalModel.objects.last().id + 1
-            else:  # если записей в таблице нет (т. е. ид пусто), то просто берем единицу
+            else:  # Если записей в таблице нет (т. е. ид пусто), то просто берем единицу
                 journal_model.id = 1
             if PublModel.objects.exists():  # публикации - если есть записи, то берем последний номер ид и прибавляем единицу
                 publ_model.id = PublModel.objects.last().id + 1
-            else:  # если записей в таблице нет (т. е. ид пусто), то просто берем единицу
+            else:  # Если записей в таблице нет (т. е. ид пусто), то просто берем единицу
                 publ_model.id = 1
             # задаем журнал
             journal_model.name = p.get('Журнал')
@@ -212,10 +212,33 @@ def update_publications(request, author_id):
 def export_to_excel(request, author_id):
     return HttpResponseRedirect(reverse('index'))
 
-
-def edit_publications(request, author_id):
-    return HttpResponseRedirect(reverse('index'))
-
+# это надо переписать
+def edit_publications(request, author_id, publ_id):
+    template_name = "PublicationReports/edit_publications.html"
+    try:
+        author_model = AuthorModel.objects.get(id=author_id)
+    except author_model.DoesNotExist:
+        return HttpResponseNotFound('Не найдено')
+    if request.method == 'GET':
+        author_form = AuthorForm(instance=author_model)
+        return TemplateResponse(request,
+                                template_name,
+                                context={'form': author_form,
+                                         'publications': PublModel.objects.filter(author=author_id),
+                                         'author_id': author_id})
+    elif request.method == 'POST':
+        author_form = AuthorForm(request.POST, request.FILES, instance=author_model)
+        if author_form.is_valid():
+            author_form.name = author_form.cleaned_data['name']
+            author_form.job = author_form.cleaned_data['job']
+            author_form.departament = author_form.cleaned_data['departament']
+            author_form.url = author_form.cleaned_data['url']
+            author_form.save()
+            return HttpResponseRedirect(reverse('index'))
+        else:
+            return TemplateResponse(request,
+                                    template_name,
+                                    context={'form': author_form})
 
 def departaments(request):
     template_name = "PublicationReports/departaments.html"

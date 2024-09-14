@@ -1,5 +1,12 @@
 {% extends 'PublicationReports/root.html' %}
 
 {% block body_content %}
-gh
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="form-group">
+            <label>Кафедра</label><br>
+            {{ form.name }}
+        </div>
+        <input type="submit" class="btn btn-primary d-inline-flex align-items-center" value="Сохранить">
+    </form>
 {% endblock body_content %}
