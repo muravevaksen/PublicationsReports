@@ -2,9 +2,10 @@ import io
 import json
 import django
 from django.db.models import Count
+
 django.setup()
 from .models import Author as AuthorModel, Publication as PublModel, Journal as JournalModel
-from .forms import AuthorForm, PublicationForm, JournalForm
+from .forms import AuthorForm, PublicationForm, JournalForm, DepartForm
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.http import HttpResponseRedirect, HttpResponseNotFound
@@ -12,6 +13,7 @@ from .parse_app.parse_app.spiders.publ_parse_spider import PublParseSpiderSpider
 import scrapy.crawler as crawler
 import multiprocess as mp
 from twisted.internet import reactor
+
 
 def index(request):
     author_model = AuthorModel.objects.all()
@@ -88,24 +90,24 @@ def update_publications(request, author_id):
     except author_model.DoesNotExist:
         return HttpResponseNotFound('Не найдено')
 
-    #if request.method == 'GET':
-    #    def f(q):
-    #        try:
-    #            runner = crawler.CrawlerRunner()
-    #            deferred = runner.crawl(PublParseSpiderSpider, domain=author_model.url)
-    #            deferred.addBoth(lambda _: reactor.stop())
-    #            reactor.run()
-    #            q.put(None)
-    #        except Exception as e:
-    #            q.put(e)
+    if request.method == 'GET':
+        def f(q):
+            try:
+                runner = crawler.CrawlerRunner()
+                deferred = runner.crawl(PublParseSpiderSpider, domain=author_model.url)
+                deferred.addBoth(lambda _: reactor.stop())
+                reactor.run()
+                q.put(None)
+            except Exception as e:
+                q.put(e)
 
-    #    q = mp.Queue()
-    #    p = mp.Process(target=f, args=(q,))
-    #    p.start()
-    #    result = q.get()
-    #    p.join()
-    #    if result is not None:
-    #        raise result
+        q = mp.Queue()
+        p = mp.Process(target=f, args=(q,))
+        p.start()
+        result = q.get()
+        p.join()
+        if result is not None:
+            raise result
 
     # считываем файлик json
     with io.open(f'PublicationReports/parse_app/publications_list.json',
@@ -122,7 +124,7 @@ def update_publications(request, author_id):
         if JournalModel.objects.filter(name=p.get('Журнал'),
                                        publisher=p.get('Издатель')).exists():
             # если в базе уже есть такая запись публикации (полная сверка)
-            if PublModel.objects.filter(title=p.get('Название'),
+            if PublModel.objects.filter(title=str(p.get('Название')).capitalize(),
                                         year=p.get('Дата публикации')[0:4],
                                         number=p.get('Номер'),
                                         volume=p.get('Том'),
@@ -131,7 +133,7 @@ def update_publications(request, author_id):
                                         author=AuthorModel.objects.get(id=author_model.id)).exists():
                 pass  # ничего не обновляем (повтор)
             # если в базе уже есть такая запись публикации (но не совпадает с автором)
-            elif PublModel.objects.filter(title=p.get('Название'),
+            elif PublModel.objects.filter(title=str(p.get('Название')).capitalize(),
                                           year=p.get('Дата публикации')[0:4],
                                           number=p.get('Номер'),
                                           volume=p.get('Том'),
@@ -140,7 +142,7 @@ def update_publications(request, author_id):
                 # то добавляем связь текущего автора и публикации
                 author_model = AuthorModel.objects.get(id=author_id)
                 author_model.save()
-                p1 = PublModel.objects.filter(title=p.get('Название'),
+                p1 = PublModel.objects.filter(title=str(p.get('Название')).capitalize(),
                                               year=p.get('Дата публикации')[0:4],
                                               number=p.get('Номер'),
                                               volume=p.get('Том'),
@@ -158,10 +160,10 @@ def update_publications(request, author_id):
                 publ_model.save()
                 # добавляем данные публикации и связь один-ко-многим с журналом
                 j1 = JournalModel.objects.filter(name=p.get('Журнал'),
-                                            publisher=p.get('Издатель'))
+                                                 publisher=p.get('Издатель'))
                 journal_model = JournalModel.objects.get(id=j1[0].id)
                 p1 = PublModel(id=publ_model.id,
-                               title=p.get('Название'),
+                               title=str(p.get('Название')).capitalize(),
                                year=p.get('Дата публикации')[0:4],
                                number=p.get('Номер'),
                                volume=p.get('Том'),
@@ -193,7 +195,7 @@ def update_publications(request, author_id):
             # добавляем данные публикации и связь один-ко-многим с журналом
             journal_model = JournalModel.objects.get(id=journal_model.id)
             p1 = PublModel(id=publ_model.id,
-                           title=p.get('Название'),
+                           title=str(p.get('Название')).capitalize(),
                            year=p.get('Дата публикации')[0:4],
                            number=p.get('Номер'),
                            volume=p.get('Том'),
@@ -206,5 +208,17 @@ def update_publications(request, author_id):
 
     return HttpResponseRedirect(reverse('index'))
 
+
 def export_to_excel(request, author_id):
     return HttpResponseRedirect(reverse('index'))
+
+
+def edit_publications(request, author_id):
+    return HttpResponseRedirect(reverse('index'))
+
+
+def departaments(request):
+    template_name = "PublicationReports/departaments.html"
+    return TemplateResponse(request,
+                            template_name,
+                            context={'form': DepartForm})
