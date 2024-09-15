@@ -1,5 +1,4 @@
 {% extends 'PublicationReports/root.html' %}
-
 {% block body_content %}
 
 <table>
@@ -26,7 +25,8 @@
     <form action="{% url 'update_publications' author_id %}" method="get">
         {% csrf_token %}
 
-        <button class="btn btn-primary d-inline-flex align-items-center" type="submit">Обновить
+        <button class="btn btn-primary d-inline-flex align-items-center" type="submit" data-bs-toggle="tooltip"
+                data-bs-placement="top" title="Подсказка справа">Обновить
         </button>
     </form>
     <form action="{% url 'export_to_excel' author_id %}" method="get">
@@ -79,7 +79,8 @@
         {% else %}
         <td> {{ p.journal.publisher }}</td>
         {% endif %}
-        <td><a href="{% url 'edit_publications' 1 p.id %}"><img src="/static/img/edit_icon.png" class="img-fluid" alt="Edit"></a></td>
+        <td><a href="{% url 'edit_publications' 1 p.id %}"><img src="/static/img/edit_icon.png" class="img-fluid"
+                                                                alt="Edit"></a></td>
     <tr>{% endfor %}<br>
     </tr>
 </table>
