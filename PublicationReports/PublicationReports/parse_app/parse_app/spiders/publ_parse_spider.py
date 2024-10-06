@@ -20,7 +20,7 @@ class PublParseSpiderSpider(CrawlSpider):
     def __init__(self, domain=None, *args, **kwargs):
         super(PublParseSpiderSpider, self).__init__(*args, **kwargs)
         self.start_urls = [
-            f"{domain}&sortby=pubdate&cstart=0&pagesize=10",
+            f"{domain}&sortby=pubdate&cstart=0&pagesize=20",
  #           f"{domain}&sortby=pubdate&cstart=101&pagesize=200",
  #           f"{domain}&sortby=pubdate&cstart=201&pagesize=300",
  #           f"{domain}&sortby=pubdate&cstart=301&pagesize=400",
@@ -31,7 +31,7 @@ class PublParseSpiderSpider(CrawlSpider):
     def parse_item(self, response):
 
         item = {}
-        item["Название"] = response.xpath('//div[@id="gsc_oci_title"]/text()').get()
+        item["Название"] = response.xpath('//a[@class="gsc_oci_title_link"]/text()').get()
         # вытаскиваем количество цитирований (очень сложно)
         citation = response.xpath('//div[@id="gsc_vcpb"]//div[@class="gsc_oci_value"]/div/a').getall()
         if len(str(citation)) > 2:

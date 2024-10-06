@@ -2,9 +2,9 @@ import io
 import json
 import django
 from django.db.models import Count
-
 django.setup()
-from .models import Author as AuthorModel, Publication as PublModel, Journal as JournalModel
+from .models import (Author as AuthorModel, Publication as PublModel, Journal as JournalModel, Book as BookModel,
+                     Conference as ConfModel, TypeOfPublication as TypeModel)
 from .forms import AuthorForm, PublicationForm, JournalForm, DepartForm
 from django.template.response import TemplateResponse
 from django.urls import reverse
@@ -13,7 +13,6 @@ from .parse_app.parse_app.spiders.publ_parse_spider import PublParseSpiderSpider
 import scrapy.crawler as crawler
 import multiprocess as mp
 from twisted.internet import reactor
-
 
 def index(request):
     author_model = AuthorModel.objects.all()
@@ -72,10 +71,6 @@ def view_author(request, author_id):
     elif request.method == 'POST':
         author_form = AuthorForm(request.POST, request.FILES, instance=author_model)
         if author_form.is_valid():
-            author_form.name = author_form.cleaned_data['name']
-            author_form.job = author_form.cleaned_data['job']
-            author_form.departament = author_form.cleaned_data['departament']
-            author_form.url = author_form.cleaned_data['url']
             author_form.save()
             return HttpResponseRedirect(reverse('index'))
         else:
@@ -116,13 +111,17 @@ def update_publications(request, author_id):
         publ_dict = json.load(JSON)
 
     journal_model = JournalModel()
+    book_model = BookModel()
+    conf_model = ConfModel()
+    type_model = TypeModel()
     publ_model = PublModel()
 
     for p in publ_dict:
         # *----------------- Обновление данных------------------------------*
-        # если в базе уже есть такая запись журнала (полная сверка)
-        if JournalModel.objects.filter(name=p.get('Журнал'),
-                                       publisher=p.get('Издатель')).exists():
+        # если в базе уже есть такая запись журнала или книги или конф (полная сверка)
+        if (JournalModel.objects.filter(name=p.get('Журнал')).exists()
+                or BookModel.objects.filter(name=p.get('Книга')).exists()
+                or ConfModel.objects.filter(name=p.get('Материалы конференции')).exists()):
             # если в базе уже есть такая запись публикации (полная сверка)
             if PublModel.objects.filter(title=str(p.get('Название')).capitalize(),
                                         year=p.get('Дата публикации')[0:4],
@@ -151,17 +150,27 @@ def update_publications(request, author_id):
                 publ_model = PublModel.objects.get(id=p1[0].id)
                 publ_model.author.add(author_model)
                 publ_model.save()
-            else:  # если журнал есть, а публикации нет
+            else:  # если журнал, книга, конф есть, а публикации нет
                 # добавляем связь многие-ко-многим автор+публикация
+                #publ_model.id = PublModel.objects.last().id + 1
                 publ_model.save(force_insert=True)
                 author_model = AuthorModel(id=author_id)
                 publ_model = PublModel(id=publ_model.id)
                 publ_model.author.add(author_model)
                 publ_model.save()
                 # добавляем данные публикации и связь один-ко-многим с журналом
-                j1 = JournalModel.objects.filter(name=p.get('Журнал'),
-                                                 publisher=p.get('Издатель'))
-                journal_model = JournalModel.objects.get(id=j1[0].id)
+                if p.get('Журнал') is not None:
+                    j1 = JournalModel.objects.filter(name=p.get('Журнал'))
+                    journal_model = JournalModel.objects.get(id=j1[0].id)
+                    type_model = TypeModel.objects.get(id=1)
+                elif p.get('Книга') is not None:
+                    b1 = BookModel.objects.filter(name=p.get('Книга'))
+                    book_model = BookModel.objects.get(id=b1[0].id)
+                    type_model = TypeModel.objects.get(id=2)
+                elif p.get('Материалы конференции') is not None:
+                    c1 = ConfModel.objects.filter(name=p.get('Материалы конференции'))
+                    conf_model = ConfModel.objects.get(id=c1[0].id)
+                    type_model = TypeModel.objects.get(id=3)
                 p1 = PublModel(id=publ_model.id,
                                title=str(p.get('Название')).capitalize(),
                                year=p.get('Дата публикации')[0:4],
@@ -169,7 +178,15 @@ def update_publications(request, author_id):
                                volume=p.get('Том'),
                                pages=p.get('Страницы'),
                                citation=p.get('Цитирования'))
-                journal_model.publication_set.add(p1, bulk=False)
+                if p.get('Журнал') is not None:
+                    journal_model.publication_set.add(p1, bulk=False)
+                    type_model.publication_set.add(p1, bulk=False)
+                if p.get('Книга') is not None:
+                    book_model.publication_set.add(p1, bulk=False)
+                    type_model.publication_set.add(p1, bulk=False)
+                if p.get('Материалы конференции') is not None:
+                    conf_model.publication_set.add(p1, bulk=False)
+                    type_model.publication_set.add(p1, bulk=False)
                 publ_model.id += 1
         # *----------------- Новые записи ------------------------------*
         else:
@@ -177,15 +194,33 @@ def update_publications(request, author_id):
                 journal_model.id = JournalModel.objects.last().id + 1
             else:  # Если записей в таблице нет (т. е. ид пусто), то просто берем единицу
                 journal_model.id = 1
+            if BookModel.objects.exists():  # книги - если есть записи, то берем последний номер ид и прибавляем единицу
+                book_model.id = BookModel.objects.last().id + 1
+            else:  # Если записей в таблице нет (т. е. ид пусто), то просто берем единицу
+                book_model.id = 1
+            if ConfModel.objects.exists():  # конференции - если есть записи, то берем последний номер ид и прибавляем единицу
+                conf_model.id = ConfModel.objects.last().id + 1
+            else:  # Если записей в таблице нет (т. е. ид пусто), то просто берем единицу
+                conf_model.id = 1
             if PublModel.objects.exists():  # публикации - если есть записи, то берем последний номер ид и прибавляем единицу
                 publ_model.id = PublModel.objects.last().id + 1
             else:  # Если записей в таблице нет (т. е. ид пусто), то просто берем единицу
                 publ_model.id = 1
             # задаем журнал
-            journal_model.name = p.get('Журнал')
-            journal_model.publisher = p.get('Издатель')
+            if p.get('Журнал') is not None:
+                journal_model.name = p.get('Журнал')
+                journal_model.publisher = p.get('Издатель')
+                journal_model.save(force_insert=True)
+            # задаем книгу
+            if p.get('Книга') is not None:
+                book_model.name = p.get('Книга')
+                book_model.publisher = p.get('Издатель')
+                book_model.save(force_insert=True)
+            # задаем конференцию
+            if p.get('Материалы конференции') is not None:
+                conf_model.name = p.get('Материалы конференции')
+                conf_model.save(force_insert=True)
             # сохраняем модельки
-            journal_model.save(force_insert=True)
             publ_model.save(force_insert=True)
             # добавляем связь многие-ко-многим автор+публикация
             author_model = AuthorModel(id=author_id)
@@ -193,7 +228,15 @@ def update_publications(request, author_id):
             publ_model.author.add(author_model)
             publ_model.save()
             # добавляем данные публикации и связь один-ко-многим с журналом
-            journal_model = JournalModel.objects.get(id=journal_model.id)
+            if p.get('Журнал') is not None:
+                journal_model = JournalModel.objects.get(id=journal_model.id)
+                type_model = TypeModel.objects.get(id=1)
+            if p.get('Книга') is not None:
+                book_model = BookModel.objects.get(id=book_model.id)
+                type_model = TypeModel.objects.get(id=2)
+            if p.get('Материалы конференции') is not None:
+                conf_model = ConfModel.objects.get(id=conf_model.id)
+                type_model = TypeModel.objects.get(id=3)
             p1 = PublModel(id=publ_model.id,
                            title=str(p.get('Название')).capitalize(),
                            year=p.get('Дата публикации')[0:4],
@@ -201,9 +244,19 @@ def update_publications(request, author_id):
                            volume=p.get('Том'),
                            pages=p.get('Страницы'),
                            citation=p.get('Цитирования'))
-            journal_model.publication_set.add(p1, bulk=False)
+            if p.get('Журнал') is not None:
+                journal_model.publication_set.add(p1, bulk=False)
+                type_model.publication_set.add(p1, bulk=False)
+                journal_model.id += 1
+            if p.get('Книга') is not None:
+                book_model.publication_set.add(p1, bulk=False)
+                type_model.publication_set.add(p1, bulk=False)
+                book_model.id += 1
+            if p.get('Материалы конференции') is not None:
+                conf_model.publication_set.add(p1, bulk=False)
+                type_model.publication_set.add(p1, bulk=False)
+                conf_model.id += 1
             # увеличиваем идентификаторы
-            journal_model.id += 1
             publ_model.id += 1
 
     return HttpResponseRedirect(reverse('index'))
