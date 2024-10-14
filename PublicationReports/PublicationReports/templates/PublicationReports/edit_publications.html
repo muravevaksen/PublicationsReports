@@ -1,4 +1,13 @@
 {% extends 'PublicationReports/root.html' %}
-
+{% load bootstrap5 %}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
 {% block body_content %}
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {% bootstrap_form form %}
+    {% bootstrap_button content="Обновить" button_type="submit" %}
+</form>
+
 {% endblock body_content %}

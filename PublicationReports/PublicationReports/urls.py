@@ -16,17 +16,18 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from .views import index, create_teacher, view_author, update_publications, export_to_excel, edit_publications, departaments
+from .views import index, create_teacher, view_author, update_publications, export_to_excel, edit_publications, view_departaments, create_publication
 from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('django.contrib.auth.urls')),
     path('create_teacher/', create_teacher, name="create_teacher"),
+    path('create_publication/', create_publication, name="create_publication"),
     path('', index, name="index"),
     path('author/<int:author_id>/', view_author, name="view_author"),
     path('author/<int:author_id>/update/', update_publications, name="update_publications"),
     path('author/<int:author_id>/export/', export_to_excel, name="export_to_excel"),
     path('author/<int:author_id>/edit/<int:publ_id>', edit_publications, name="edit_publications"),
-    path('departaments', departaments, name="departaments"),
+    path('departaments', view_departaments, name="departaments"),
 ]

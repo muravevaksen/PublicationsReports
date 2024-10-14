@@ -5,7 +5,7 @@ from django.db.models import Count
 django.setup()
 from .models import (Author as AuthorModel, Publication as PublModel, Journal as JournalModel, Book as BookModel,
                      Conference as ConfModel, TypeOfPublication as TypeModel)
-from .forms import AuthorForm, PublicationForm, JournalForm, DepartForm
+from .forms import AuthorForm, PublicationForm as PublForm, JournalForm, DepartForm
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.http import HttpResponseRedirect, HttpResponseNotFound
@@ -69,7 +69,7 @@ def view_author(request, author_id):
                                          'publications': PublModel.objects.filter(author=author_id),
                                          'author_id': author_id})
     elif request.method == 'POST':
-        author_form = AuthorForm(request.POST, request.FILES, instance=author_model)
+        author_form = AuthorForm(request.POST, instance=author_model)
         if author_form.is_valid():
             author_form.save()
             return HttpResponseRedirect(reverse('index'))
@@ -77,7 +77,15 @@ def view_author(request, author_id):
             return TemplateResponse(request,
                                     template_name,
                                     context={'form': author_form})
-
+    elif request.method == 'DELETE':
+        author_form = AuthorForm(request.POST, instance=author_model)
+        if author_form.is_valid():
+            author_model.objects.filter(id=author_id).delete()
+            return HttpResponseRedirect(reverse('index'))
+        else:
+            return TemplateResponse(request,
+                                    template_name,
+                                    context={'form': author_form})
 
 def update_publications(request, author_id):
     try:
@@ -269,32 +277,32 @@ def export_to_excel(request, author_id):
 def edit_publications(request, author_id, publ_id):
     template_name = "PublicationReports/edit_publications.html"
     try:
-        author_model = AuthorModel.objects.get(id=author_id)
-    except author_model.DoesNotExist:
+        publ_model = PublModel.objects.get(id=publ_id)
+    except publ_model.DoesNotExist:
         return HttpResponseNotFound('Не найдено')
     if request.method == 'GET':
-        author_form = AuthorForm(instance=author_model)
+        publ_form = PublForm(instance=publ_model)
         return TemplateResponse(request,
                                 template_name,
-                                context={'form': author_form,
+                                context={'form': publ_form,
                                          'publications': PublModel.objects.filter(author=author_id),
-                                         'author_id': author_id})
+                                         'author_id': author_id,
+                                         'publ_id': publ_id})
     elif request.method == 'POST':
-        author_form = AuthorForm(request.POST, request.FILES, instance=author_model)
-        if author_form.is_valid():
-            author_form.name = author_form.cleaned_data['name']
-            author_form.job = author_form.cleaned_data['job']
-            author_form.departament = author_form.cleaned_data['departament']
-            author_form.url = author_form.cleaned_data['url']
-            author_form.save()
+        publ_form = PublForm(request.POST, instance=publ_model)
+        if publ_form.is_valid():
+            publ_form.save()
             return HttpResponseRedirect(reverse('index'))
         else:
             return TemplateResponse(request,
                                     template_name,
-                                    context={'form': author_form})
+                                    context={'form': publ_form})
 
-def departaments(request):
-    template_name = "PublicationReports/departaments.html"
+def view_departaments(request):
+    template_name = "PublicationReports/view_departaments.html"
     return TemplateResponse(request,
                             template_name,
                             context={'form': DepartForm})
+
+def create_publication(request):
+    pass

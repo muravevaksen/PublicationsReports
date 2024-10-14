@@ -26,6 +26,9 @@ class Author(models.Model):
     url = models.CharField(max_length=200, verbose_name='URL Google Scholar')
 
     class Meta:
+        ordering = ['name', 'job', 'departament']
+
+    class Meta:
         permissions = (("can_add_teacher", "add teacher"), ("can_update_teacher", "update teacher"),)
 
 class TypeOfPublication(models.Model):
@@ -34,17 +37,17 @@ class TypeOfPublication(models.Model):
 
 class Publication(models.Model):
     id = models.AutoField(primary_key=True)
-    title = models.CharField(max_length=200)
-    year = models.IntegerField(null=True)
-    number = models.CharField(max_length=20, null=True)
-    volume = models.CharField(max_length=20, null=True)
-    pages = models.CharField(max_length=20, null=True)
-    citation = models.IntegerField(null=True)
-    author = models.ManyToManyField(Author)
-    journal = models.ForeignKey(Journal, on_delete=models.CASCADE, null=True)
-    book = models.ForeignKey(Book, on_delete=models.CASCADE, null=True)
-    conference = models.ForeignKey(Conference, on_delete=models.CASCADE, null=True)
-    type = models.ForeignKey(TypeOfPublication, on_delete=models.CASCADE, default=4)
+    title = models.CharField(max_length=200, verbose_name='Название')
+    year = models.IntegerField(null=True, verbose_name='Год')
+    number = models.CharField(max_length=20, null=True, verbose_name='Номер')
+    volume = models.CharField(max_length=20, null=True, verbose_name='Том')
+    pages = models.CharField(max_length=20, null=True, verbose_name='Страницы')
+    citation = models.IntegerField(null=True, verbose_name='Цитирования')
+    author = models.ManyToManyField(Author, verbose_name='Автор')
+    journal = models.ForeignKey(Journal, on_delete=models.CASCADE, null=True, verbose_name='Журнал')
+    book = models.ForeignKey(Book, on_delete=models.CASCADE, null=True, verbose_name='Книга')
+    conference = models.ForeignKey(Conference, on_delete=models.CASCADE, null=True, verbose_name='Конференция')
+    type = models.ForeignKey(TypeOfPublication, on_delete=models.CASCADE, default=4, verbose_name='Тип')
 
     class Meta:
         ordering = ['-year', 'journal', 'number']
