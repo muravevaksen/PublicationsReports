@@ -4,27 +4,25 @@
 {% bootstrap_javascript}
 {% block body_content %}
 
-<table>
-    <form method="post">
-        {% bootstrap_form form %}
-        {% csrf_token %}
-        {% bootstrap_button button_type="submit" content="Сохранить изменения" %}
-    </form>
-    <form method="delete">
-        {% bootstrap_button button_type="submit" content="Удалить автора" %}
-    </form>
-    <form action="{% url 'create_publication' %}" method="get">
+<form method="post">
+    {% bootstrap_form form %}
+    {% csrf_token %}
+    {% bootstrap_button button_type="submit" content="Сохранить изменения" %}
+</form>
+<form method="delete">
+    {% bootstrap_button button_type="submit" content="Удалить автора" %}
+</form>
+<form action="{% url 'create_publication' %}" method="get">
     {% csrf_token %}
     <button type="submit" class="btn btn-primary d-inline-flex align-items-center">Добавить публикацию</button>
 </form>
-    <form action="{% url 'update_publications' author_id %}" method="get">
-        {% bootstrap_button button_type="submit" content="Обновить публикации" %}
-    </form>
-    <form action="{% url 'export_to_excel' author_id %}" method="get">
-        {% csrf_token %}
-        <a href="{% url 'export_to_excel' 1 %}"><img src="/static/img/excel_icon.png" class="img-fluid" alt="Excel"></a>
-    </form>
-</table>
+<form action="{% url 'update_publications' author_id %}" method="get">
+    {% bootstrap_button button_type="submit" content="Обновить публикации" %}
+</form>
+<form action="{% url 'export_to_excel' author_id %}" method="get">
+    {% csrf_token %}
+    <a href="{% url 'export_to_excel' 1 %}"><img src="/static/img/excel_icon.png" class="img-fluid" alt="Excel"></a>
+</form>
 
 <table class="table table-bordered">
     <tr>

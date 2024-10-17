@@ -2,6 +2,8 @@ import io
 import json
 import django
 from django.db.models import Count
+from django.shortcuts import render
+
 django.setup()
 from .models import (Author as AuthorModel, Publication as PublModel, Journal as JournalModel, Book as BookModel,
                      Conference as ConfModel, TypeOfPublication as TypeModel)
@@ -72,7 +74,7 @@ def view_author(request, author_id):
         author_form = AuthorForm(request.POST, instance=author_model)
         if author_form.is_valid():
             author_form.save()
-            return HttpResponseRedirect(reverse('index'))
+            return HttpResponseRedirect(reverse('index')) # должен быть редирект обратно на страницу автора
         else:
             return TemplateResponse(request,
                                     template_name,
@@ -300,9 +302,11 @@ def edit_publications(request, author_id, publ_id):
 
 def view_departaments(request):
     template_name = "PublicationReports/view_departaments.html"
+    depart_model = PublModel.objects.all()
     return TemplateResponse(request,
                             template_name,
-                            context={'form': DepartForm})
+                            context={'form': DepartForm,
+                                     'departaments': depart_model})
 
 def create_publication(request):
     pass

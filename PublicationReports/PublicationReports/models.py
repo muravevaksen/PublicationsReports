@@ -16,7 +16,7 @@ class Conference(models.Model):
 
 class Departament(models.Model):
     id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=200, unique=True)
+    name = models.CharField(max_length=200, unique=True, verbose_name='Наименование кафедры')
 
 class Author(models.Model):
     id = models.AutoField(primary_key=True)
