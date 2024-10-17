@@ -69,6 +69,7 @@ def view_author(request, author_id):
                                 template_name,
                                 context={'form': author_form,
                                          'publications': PublModel.objects.filter(author=author_id),
+                                         'authors': author_model,
                                          'author_id': author_id})
     elif request.method == 'POST':
         author_form = AuthorForm(request.POST, instance=author_model)
@@ -79,15 +80,9 @@ def view_author(request, author_id):
             return TemplateResponse(request,
                                     template_name,
                                     context={'form': author_form})
-    elif request.method == 'DELETE':
-        author_form = AuthorForm(request.POST, instance=author_model)
-        if author_form.is_valid():
-            author_model.objects.filter(id=author_id).delete()
-            return HttpResponseRedirect(reverse('index'))
-        else:
-            return TemplateResponse(request,
-                                    template_name,
-                                    context={'form': author_form})
+
+def delete_author(request, author_id):
+    pass
 
 def update_publications(request, author_id):
     try:

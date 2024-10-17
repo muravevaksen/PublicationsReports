@@ -16,7 +16,8 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from .views import index, create_teacher, view_author, update_publications, export_to_excel, edit_publications, view_departaments, create_publication
+from .views import index, create_teacher, view_author, update_publications, export_to_excel, edit_publications, \
+    view_departaments, create_publication, delete_author
 from django.conf.urls.static import static
 
 urlpatterns = [
@@ -30,4 +31,5 @@ urlpatterns = [
     path('author/<int:author_id>/export/', export_to_excel, name="export_to_excel"),
     path('author/<int:author_id>/edit/<int:publ_id>', edit_publications, name="edit_publications"),
     path('departaments', view_departaments, name="departaments"),
+    path('author/<int:author_id>/delete', delete_author, name="delete_author"),
 ]

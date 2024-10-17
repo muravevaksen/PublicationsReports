@@ -27,8 +27,6 @@ class Author(models.Model):
 
     class Meta:
         ordering = ['name', 'job', 'departament']
-
-    class Meta:
         permissions = (("can_add_teacher", "add teacher"), ("can_update_teacher", "update teacher"),)
 
 class TypeOfPublication(models.Model):
@@ -51,3 +49,4 @@ class Publication(models.Model):
 
     class Meta:
         ordering = ['-year', 'journal', 'number']
+        permissions = (("can_add_publication", "add publication"), ("can_update_publication", "update publication"),)
