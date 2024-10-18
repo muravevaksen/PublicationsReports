@@ -15,6 +15,7 @@ from .parse_app.parse_app.spiders.publ_parse_spider import PublParseSpiderSpider
 import scrapy.crawler as crawler
 import multiprocess as mp
 from twisted.internet import reactor
+from django.contrib.auth.decorators import login_required, user_passes_test
 
 def index(request):
     author_model = AuthorModel.objects.all()
@@ -33,8 +34,10 @@ def index(request):
                                      'name': name,
                                      'depart': depart,
                                      'pcount': pcount})
+def check_is_personal(user):
+    return user.is_staff
 
-
+@user_passes_test(check_is_personal)
 def create_teacher(request):
     template_name = "PublicationReports/new_teacher.html"
     if request.method == 'GET':
@@ -72,14 +75,18 @@ def view_author(request, author_id):
                                          'authors': author_model,
                                          'author_id': author_id})
     elif request.method == 'POST':
-        author_form = AuthorForm(request.POST, instance=author_model)
-        if author_form.is_valid():
-            author_form.save()
-            return HttpResponseRedirect(reverse('index')) # должен быть редирект обратно на страницу автора
+        if 'delete_author' in request.POST:
+            author_model.delete()
+            return HttpResponseRedirect(reverse('index'))
         else:
-            return TemplateResponse(request,
-                                    template_name,
-                                    context={'form': author_form})
+            author_form = AuthorForm(request.POST, instance=author_model)
+            if author_form.is_valid():
+                author_form.save()
+                return HttpResponseRedirect(reverse('index')) # должен быть редирект обратно на страницу автора
+            else:
+                return TemplateResponse(request,
+                                        template_name,
+                                        context={'form': author_form})
 
 def delete_author(request, author_id):
     pass

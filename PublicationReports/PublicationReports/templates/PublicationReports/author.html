@@ -9,10 +9,7 @@
     {% bootstrap_form form %}
     {% csrf_token %}
     {% bootstrap_button button_type="submit" content="Сохранить изменения" %}
-</form>
-<form action="{% url 'delete_author' author_id %}" method="post">
-    {% csrf_token %}
-    {% bootstrap_button button_type="submit" content="Удалить автора" %}
+    {% bootstrap_button button_type="submit" name="delete_author" content="Удалить автора" %}
 </form>
 <form action="{% url 'create_publication' %}" method="get">
     {% bootstrap_button button_type="submit" content="Добавить публикацию" %}

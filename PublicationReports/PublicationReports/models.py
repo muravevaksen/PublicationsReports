@@ -18,12 +18,18 @@ class Departament(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=200, unique=True, verbose_name='Наименование кафедры')
 
+    def __str__(self):
+        return self.name
+
 class Author(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=200, verbose_name='ФИО')
     job = models.CharField(max_length=200, verbose_name='Место работы')
     departament = models.ForeignKey(Departament, verbose_name='Кафедра', on_delete=models.CASCADE)
     url = models.CharField(max_length=200, verbose_name='URL Google Scholar')
+
+    def __str__(self):
+        return f'{self.name} ({self.departament})'
 
     class Meta:
         ordering = ['name', 'job', 'departament']
@@ -38,7 +44,7 @@ class Publication(models.Model):
     title = models.CharField(max_length=200, verbose_name='Название')
     year = models.IntegerField(null=True, verbose_name='Год')
     number = models.CharField(max_length=20, null=True, verbose_name='Номер')
-    volume = models.CharField(max_length=20, null=True, verbose_name='Том')
+    volume = models.CharField(max_length=20, null=True, default=None, blank=True, verbose_name='Том')
     pages = models.CharField(max_length=20, null=True, verbose_name='Страницы')
     citation = models.IntegerField(null=True, verbose_name='Цитирования')
     author = models.ManyToManyField(Author, verbose_name='Автор')
