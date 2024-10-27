@@ -4,16 +4,31 @@
 {% bootstrap_javascript}
 {% block body_content %}
 
-<table>
-    {% for d in departaments %}
-    {{ d.name }}
-    {% endfor %}
-</table>
-
-<form method="post">
-    {% csrf_token %}
-    {% bootstrap_form form %}
-    {% bootstrap_button button_type="submit" content="Сохранить" %}
+<form method="post" enctype="multipart/form-data">
+    {% bootstrap_button content="Добавить кафедру" button_type="submit" %}
 </form>
+
+<table>
+    <tr>
+        <th>Кафедра</th>
+        <th>Сотрудники</th>
+        <th>Количество публикаций</th>
+        <th></th>
+    </tr>
+    <tr>
+        {% for d in departaments %}
+        <td>{{ forloop.counter }}</td>
+        <td>{{ d.name }}</td>
+        <td>сотруднички</td>
+        <td>
+            {% if perms.catalog.can_update_publication %}
+            <a href="{% url 'edit_departaments' d.id %}">
+                <img src="/static/img/edit_icon.png" class="img-fluid" alt="Edit"></a>
+            {% endif %}
+        </td>
+    <tr>{% endfor %}
+        <br>
+    </tr>
+</table>
 
 {% endblock body_content %}

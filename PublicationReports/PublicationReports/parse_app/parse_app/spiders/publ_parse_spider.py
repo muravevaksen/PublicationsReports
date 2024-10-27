@@ -1,5 +1,4 @@
 import re
-
 from scrapy.exceptions import DontCloseSpider
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import Rule, CrawlSpider

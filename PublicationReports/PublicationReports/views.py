@@ -1,12 +1,11 @@
 import io
 import json
 import django
-from django.db.models import Count
+from django.db.models import Count, Max
 from django.shortcuts import render
-
 django.setup()
 from .models import (Author as AuthorModel, Publication as PublModel, Journal as JournalModel, Book as BookModel,
-                     Conference as ConfModel, TypeOfPublication as TypeModel)
+                     Conference as ConfModel, TypeOfPublication as TypeModel, Departament as DepartModel)
 from .forms import AuthorForm, PublicationForm as PublForm, JournalForm, DepartForm
 from django.template.response import TemplateResponse
 from django.urls import reverse
@@ -16,6 +15,9 @@ import scrapy.crawler as crawler
 import multiprocess as mp
 from twisted.internet import reactor
 from django.contrib.auth.decorators import login_required, user_passes_test
+
+def check_is_personal(user):
+    return user.is_staff
 
 def index(request):
     author_model = AuthorModel.objects.all()
@@ -34,8 +36,6 @@ def index(request):
                                      'name': name,
                                      'depart': depart,
                                      'pcount': pcount})
-def check_is_personal(user):
-    return user.is_staff
 
 @user_passes_test(check_is_personal)
 def create_teacher(request):
@@ -82,15 +82,13 @@ def view_author(request, author_id):
             author_form = AuthorForm(request.POST, instance=author_model)
             if author_form.is_valid():
                 author_form.save()
-                return HttpResponseRedirect(reverse('index')) # должен быть редирект обратно на страницу автора
+                return HttpResponseRedirect(reverse('index'))
             else:
                 return TemplateResponse(request,
                                         template_name,
                                         context={'form': author_form})
 
-def delete_author(request, author_id):
-    pass
-
+@user_passes_test(check_is_personal)
 def update_publications(request, author_id):
     try:
         author_model = AuthorModel.objects.get(id=author_id)
@@ -164,7 +162,6 @@ def update_publications(request, author_id):
                 publ_model.save()
             else:  # если журнал, книга, конф есть, а публикации нет
                 # добавляем связь многие-ко-многим автор+публикация
-                #publ_model.id = PublModel.objects.last().id + 1
                 publ_model.save(force_insert=True)
                 author_model = AuthorModel(id=author_id)
                 publ_model = PublModel(id=publ_model.id)
@@ -203,19 +200,19 @@ def update_publications(request, author_id):
         # *----------------- Новые записи ------------------------------*
         else:
             if JournalModel.objects.exists():  # журналы - если есть записи, то берем последний номер ид и прибавляем единицу
-                journal_model.id = JournalModel.objects.last().id + 1
+                journal_model.id = int(JournalModel.objects.aggregate(Max('id'))['id__max']) + 1
             else:  # Если записей в таблице нет (т. е. ид пусто), то просто берем единицу
                 journal_model.id = 1
             if BookModel.objects.exists():  # книги - если есть записи, то берем последний номер ид и прибавляем единицу
-                book_model.id = BookModel.objects.last().id + 1
+                book_model.id = int(BookModel.objects.aggregate(Max('id'))['id__max']) + 1
             else:  # Если записей в таблице нет (т. е. ид пусто), то просто берем единицу
                 book_model.id = 1
             if ConfModel.objects.exists():  # конференции - если есть записи, то берем последний номер ид и прибавляем единицу
-                conf_model.id = ConfModel.objects.last().id + 1
+                conf_model.id = int(ConfModel.objects.aggregate(Max('id'))['id__max']) + 1
             else:  # Если записей в таблице нет (т. е. ид пусто), то просто берем единицу
                 conf_model.id = 1
             if PublModel.objects.exists():  # публикации - если есть записи, то берем последний номер ид и прибавляем единицу
-                publ_model.id = PublModel.objects.last().id + 1
+                publ_model.id = int(PublModel.objects.aggregate(Max('id'))['id__max']) + 1
             else:  # Если записей в таблице нет (т. е. ид пусто), то просто берем единицу
                 publ_model.id = 1
             # задаем журнал
@@ -273,11 +270,11 @@ def update_publications(request, author_id):
 
     return HttpResponseRedirect(reverse('index'))
 
-
 def export_to_excel(request, author_id):
     return HttpResponseRedirect(reverse('index'))
 
 # это надо переписать
+@user_passes_test(check_is_personal)
 def edit_publications(request, author_id, publ_id):
     template_name = "PublicationReports/edit_publications.html"
     try:
@@ -293,22 +290,101 @@ def edit_publications(request, author_id, publ_id):
                                          'author_id': author_id,
                                          'publ_id': publ_id})
     elif request.method == 'POST':
-        publ_form = PublForm(request.POST, instance=publ_model)
+        if 'delete_publ' in request.POST:
+            publ_model.delete()
+            return HttpResponseRedirect(reverse('index'))
+        else:
+            publ_form = PublForm(request.POST, instance=publ_model)
+            if publ_form.is_valid():
+                publ_form.save()
+                return HttpResponseRedirect(reverse('index'))
+            else:
+                return TemplateResponse(request,
+                                        template_name,
+                                        context={'form': publ_form})
+
+def view_departaments(request):
+    template_name = "PublicationReports/view_departaments.html"
+    depart_model = DepartModel()
+    if request.method == 'GET':
+        depart_form = DepartForm(instance=depart_model)
+        return TemplateResponse(request,
+                                template_name,
+                                context={'form': depart_form,
+                                         'departaments': DepartModel.objects.all()})
+
+@user_passes_test(check_is_personal)
+def edit_departaments(request, depart_id):
+    template_name = "PublicationReports/edit_departaments.html"
+    try:
+        depart_model = DepartModel.objects.get(id=depart_id)
+    except depart_model.DoesNotExist:
+        return HttpResponseNotFound('Не найдено')
+    if request.method == 'GET':
+        depart_form = DepartForm(instance=depart_model)
+        return TemplateResponse(request,
+                                template_name,
+                                context={'form': depart_form,
+                                         'departamnets': DepartModel.objects.all(),
+                                         'depart_id': depart_id})
+    elif request.method == 'POST':
+        if 'delete_depart' in request.POST:
+            depart_model.delete()
+            return HttpResponseRedirect(reverse('index'))
+        else:
+            depart_form = DepartForm(request.POST, instance=depart_model)
+            if depart_form.is_valid():
+                depart_form.save()
+                return HttpResponseRedirect(reverse('index'))
+            else:
+                return TemplateResponse(request,
+                                        template_name,
+                                        context={'form': depart_form})
+
+@user_passes_test(check_is_personal)
+def create_publication(request, author_id):
+    template_name = "PublicationReports/create_publication.html"
+    if request.method == 'GET':
+        publ_form = PublForm()
+        return TemplateResponse(request,
+                                template_name,
+                                context={'form': publ_form})
+    elif request.method == 'POST':
+        publ_form = AuthorForm(request.POST, request.FILES)
         if publ_form.is_valid():
-            publ_form.save()
+            new_publ = PublModel(title=publ_form.cleaned_data['title'],
+                                 year=publ_form.cleaned_data['year'],
+                                 number=publ_form.cleaned_data['number'],
+                                 volume=publ_form.cleaned_data['volume'],
+                                 pages=publ_form.cleaned_data['pages'],
+                                 citation=publ_form.cleaned_data['citation'],
+                                 author=publ_form.cleaned_data['author'],
+                                 journal=publ_form.cleaned_data['journal'],
+                                 book=publ_form.cleaned_data['book'],
+                                 conference=publ_form.cleaned_data['conference'],
+                                 type=publ_form.cleaned_data['type'])
+            new_publ.save()
             return HttpResponseRedirect(reverse('index'))
         else:
             return TemplateResponse(request,
                                     template_name,
                                     context={'form': publ_form})
 
-def view_departaments(request):
-    template_name = "PublicationReports/view_departaments.html"
-    depart_model = PublModel.objects.all()
-    return TemplateResponse(request,
-                            template_name,
-                            context={'form': DepartForm,
-                                     'departaments': depart_model})
-
-def create_publication(request):
-    pass
+@user_passes_test(check_is_personal)
+def create_departament(request):
+    template_name = "PublicationReports/create_departament.html"
+    if request.method == 'GET':
+        depart_form = DepartForm()
+        return TemplateResponse(request,
+                                template_name,
+                                context={'form': depart_form})
+    elif request.method == 'POST':
+        depart_form = DepartForm(request.POST)
+        if depart_form.is_valid():
+            new_depart = DepartModel(name=depart_form.cleaned_data['name'])
+            new_depart.save()
+            return HttpResponseRedirect(reverse('index'))
+        else:
+            return TemplateResponse(request,
+                                    template_name,
+                                    context={'form': depart_form})

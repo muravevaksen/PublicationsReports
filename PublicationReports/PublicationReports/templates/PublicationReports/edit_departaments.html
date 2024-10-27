@@ -1,14 +1,14 @@
 {% extends 'PublicationReports/root.html' %}
 {% load bootstrap5 %}
 {% bootstrap_css %}
-{% bootstrap_javascript %}
+{% bootstrap_javascript}
 {% block body_content %}
 
 <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
     {% bootstrap_form form %}
     {% bootstrap_button content="Обновить" button_type="submit" %}
-    {% bootstrap_button button_type="submit" name="delete_publ" content="Удалить публикацию" %}
+    {% bootstrap_button button_type="submit" name="delete_depart" content="Удалить кафедру" %}
 </form>
 
 {% endblock body_content %}

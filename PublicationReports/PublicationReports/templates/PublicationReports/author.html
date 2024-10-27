@@ -11,7 +11,7 @@
     {% bootstrap_button button_type="submit" content="Сохранить изменения" %}
     {% bootstrap_button button_type="submit" name="delete_author" content="Удалить автора" %}
 </form>
-<form action="{% url 'create_publication' %}" method="get">
+<form action="{% url 'create_publication' author_id %}" method="get">
     {% bootstrap_button button_type="submit" content="Добавить публикацию" %}
 </form>
 <form action="{% url 'update_publications' author_id %}" method="get">
@@ -80,7 +80,7 @@
         {% endif %}
         <td>
             {% if perms.catalog.can_update_publication %}
-            <a href="{% url 'edit_publications' 1 p.id %}">
+            <a href="{% url 'edit_publications' author_id p.id %}">
                 <img src="/static/img/edit_icon.png" class="img-fluid" alt="Edit"></a>
             {% endif %}
         </td>
