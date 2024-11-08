@@ -2,3 +2,6 @@ django
 django-bootstrap5
 scrapy
 multiprocess
+pandas
+openpyxl
+pandas

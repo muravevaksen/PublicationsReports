@@ -1,41 +1,49 @@
 {% extends 'PublicationReports/root.html' %}
 {% load bootstrap5 %}
 {% bootstrap_css %}
-{% bootstrap_javascript}
+{% bootstrap_javascript %}
 {% block body_content %}
 
 {% if perms.catalog.can_update_teacher %}
+
 <form method="post">
     {% bootstrap_form form %}
     {% csrf_token %}
     {% bootstrap_button button_type="submit" content="Сохранить изменения" %}
     {% bootstrap_button button_type="submit" name="delete_author" content="Удалить автора" %}
 </form>
+
 <form action="{% url 'create_publication' author_id %}" method="get">
     {% bootstrap_button button_type="submit" content="Добавить публикацию" %}
 </form>
+
 <form action="{% url 'update_publications' author_id %}" method="get">
     {% bootstrap_button button_type="submit" content="Обновить публикации" %}
 </form>
+
 <form action="{% url 'export_to_excel' author_id %}" method="get">
-    <a href="{% url 'export_to_excel' 1 %}">
-        <img src="/static/img/excel_icon.png" alt="Excel"></a>
+    {% bootstrap_button button_type="submit" content="Генерация отчета" %}
 </form>
-<br>Всего публикаций:
 
 {% else %}
-{{ authors.name }}
-<br>{{ authors.job }}
-<br>{{ authors.departament.name }}
-<br>Всего:
-<br>Всего публикаций:
-<br>Всего книг:
-<br> Всего конференций:
+
+{% bootstrap_label authors.name %}
+<br>{% bootstrap_label authors.job %}
+<br>{% bootstrap_label authors.departament.name %}
+<br>{% bootstrap_label 'Всего публикаций в журналах:' %}
+<br>{% bootstrap_label 'Всего публикаций в книгах:' %}
+<br>{% bootstrap_label 'Всего материалов конференций:' %}
+<br>{% bootstrap_label 'Самый публикуемый год:' %}
+<br>{% bootstrap_label 'Самый публикуемый журнал:' %}
+
+<form action="{% url 'export_to_excel' author_id %}" method="get">
+    {% bootstrap_button button_type="submit" content="Выгрузить в Excel" %}
+</form>
 
 {% endif %}
 
-<table>
-    <tr>
+<table class="table">
+    <tr align="center">
         <th>№</th>
         <th>Название</th>
         <th>Год</th>
@@ -44,6 +52,8 @@
         <th>Страницы</th>
         <th>Цитирования</th>
         <th>Журнал</th>
+        <th>Книга</th>
+        <th>Конференция</th>
         <th>Издатель</th>
         <th></th>
     </tr>
@@ -72,6 +82,16 @@
         <td></td>
         {% else %}
         <td> {{ p.journal.name }}</td>
+        {% endif %}
+        {% if p.book is null %}
+        <td></td>
+        {% else %}
+        <td> {{ p.book }}</td>
+        {% endif %}
+        {% if p.conference is null %}
+        <td></td>
+        {% else %}
+        <td> {{ p.conference }}</td>
         {% endif %}
         {% if p.journal.publisher is null %}
         <td></td>

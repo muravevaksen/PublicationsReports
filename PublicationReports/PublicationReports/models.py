@@ -2,38 +2,38 @@ from django.db import models
 
 class Journal(models.Model):
     id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=200, unique=True, null=True)
-    publisher = models.CharField(max_length=200, null=True)
+    name = models.CharField(max_length=500, unique=True, null=True)
+    publisher = models.CharField(max_length=500, null=True)
 
     def __str__(self):
         return self.name
 
 class Book(models.Model):
     id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=200, unique=True, null=True)
-    publisher = models.CharField(max_length=200, null=True)
+    name = models.CharField(max_length=500, unique=True, null=True)
+    publisher = models.CharField(max_length=500, null=True)
 
     def __str__(self):
         return self.name
 
 class Conference(models.Model):
     id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=200, unique=True, null=True)
+    name = models.CharField(max_length=500, unique=True, null=True)
 
     def __str__(self):
         return self.name
 
 class Departament(models.Model):
     id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=200, unique=True, verbose_name='Наименование кафедры')
+    name = models.CharField(max_length=500, unique=True, verbose_name='Наименование кафедры')
 
     def __str__(self):
         return self.name
 
 class Author(models.Model):
     id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=200, verbose_name='ФИО')
-    job = models.CharField(max_length=200, verbose_name='Место работы')
+    name = models.CharField(max_length=500, verbose_name='ФИО')
+    job = models.CharField(max_length=500, verbose_name='Место работы')
     departament = models.ForeignKey(Departament, verbose_name='Кафедра', on_delete=models.CASCADE)
     url = models.CharField(max_length=200, verbose_name='URL Google Scholar')
 
@@ -41,7 +41,7 @@ class Author(models.Model):
         return f'{self.name} ({self.departament})'
 
     class Meta:
-        #ordering = ['name', 'job', 'departament']
+        #ordering = ['departament', 'name']
         permissions = (("can_add_teacher", "add teacher"), ("can_update_teacher", "update teacher"),)
 
 class TypeOfPublication(models.Model):
@@ -53,7 +53,7 @@ class TypeOfPublication(models.Model):
 
 class Publication(models.Model):
     id = models.AutoField(primary_key=True)
-    title = models.CharField(max_length=200, verbose_name='Название')
+    title = models.CharField(max_length=500, verbose_name='Название')
     year = models.IntegerField(null=True, verbose_name='Год')
     number = models.CharField(max_length=20, null=True, default=None, blank=True, verbose_name='Номер')
     volume = models.CharField(max_length=20, null=True, default=None, blank=True, verbose_name='Том')

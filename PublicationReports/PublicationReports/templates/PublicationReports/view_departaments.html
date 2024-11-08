@@ -4,9 +4,11 @@
 {% bootstrap_javascript}
 {% block body_content %}
 
-<form method="post" enctype="multipart/form-data">
-    {% bootstrap_button content="Добавить кафедру" button_type="submit" %}
+{% if perms.catalog.can_update_teacher %}
+<form action="{% url 'create_departament' %}" method="get">
+    {% bootstrap_button button_type="submit" content="Добавить кафедру" %}
 </form>
+{% endif %}
 
 <table>
     <tr>
