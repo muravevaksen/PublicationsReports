@@ -2,7 +2,8 @@ import io
 import json
 import django
 import pandas
-from django.db.models import Count, Max
+from django.db.models import Count, Max, Sum
+from django.db.models.functions import TruncMonth
 from django.shortcuts import render
 
 django.setup()
@@ -24,6 +25,7 @@ import openpyxl
 def check_is_personal(user):
     return user.is_staff
 
+
 def index(request):
     author_model = AuthorModel.objects.all()
     # считаем количество публикаций каждого автора
@@ -32,6 +34,7 @@ def index(request):
                             'PublicationReports/index.html',
                             context={'authors': author_model,
                                      'publ_count': publ_count})
+
 
 @user_passes_test(check_is_personal)
 def create_teacher(request):
@@ -64,12 +67,47 @@ def view_author(request, author_id):
         return HttpResponseNotFound('Не найдено')
     if request.method == 'GET':
         author_form = AuthorForm(instance=author_model)
+
+        # Количество публикаций
+        num_journals = len(PublModel.objects.filter(author=author_id, type='1'))
+        num_books = len(PublModel.objects.filter(author=author_id, type='2'))
+        num_conf = len(PublModel.objects.filter(author=author_id, type='3'))
+
+        # Индекс Хирша
+        h_publ = PublModel.objects.filter(author=author_id)
+        h_publ = h_publ.order_by('-citation').values()
+        h_publ = list(h_publ)
+
+        i = 1
+        h = 0
+
+        for p in h_publ:
+            if i >= p.get('citation'):
+                h = p.get('citation')
+                break
+            i += 1
+
+        # Индекс цитирования
+        cit_publ = PublModel.objects.filter(author=author_id)
+        cit_publ = cit_publ.aggregate(Sum("citation"))
+
+        # График по годам
+        graph_for_years = PublModel.objects.filter(author=author_id, year__range=[2000, 2100])
+        graph_for_years = graph_for_years.values('year').annotate(count_publ=Count('id')).values('year', 'count_publ')
+        graph_for_years = graph_for_years.order_by('year')
+
         return TemplateResponse(request,
                                 template_name,
                                 context={'form': author_form,
                                          'publications': PublModel.objects.filter(author=author_id),
                                          'authors': author_model,
-                                         'author_id': author_id})
+                                         'author_id': author_id,
+                                         'num_journals': num_journals,
+                                         'num_books': num_books,
+                                         'num_conf': num_conf,
+                                         'hindex': h,
+                                         'cit_publ': cit_publ,
+                                         'graph_for_years': graph_for_years})
     elif request.method == 'POST':
         if 'delete_author' in request.POST:
             author_model.delete()
@@ -154,20 +192,20 @@ def update_publications(request, author_id):
                     pass  # ничего не обновляем (повтор)
                 # если в базе уже есть такая запись публикации (но не совпадает с автором)
                 elif PublModel.objects.filter(title=str(p.get('Название')).capitalize(),
-                                            year=p.get('Дата публикации')[0:4],
-                                            number=p.get('Номер'),
-                                            volume=p.get('Том'),
-                                            pages=p.get('Страницы'),
-                                            citation=p.get('Цитирования')).exists():
+                                              year=p.get('Дата публикации')[0:4],
+                                              number=p.get('Номер'),
+                                              volume=p.get('Том'),
+                                              pages=p.get('Страницы'),
+                                              citation=p.get('Цитирования')).exists():
                     # то добавляем связь текущего автора и публикации
                     author_model = AuthorModel.objects.get(id=author_id)
                     author_model.save()
                     p1 = PublModel.objects.filter(title=str(p.get('Название')).capitalize(),
-                                                year=p.get('Дата публикации')[0:4],
-                                                number=p.get('Номер'),
-                                                volume=p.get('Том'),
-                                                pages=p.get('Страницы'),
-                                                citation=p.get('Цитирования'))
+                                                  year=p.get('Дата публикации')[0:4],
+                                                  number=p.get('Номер'),
+                                                  volume=p.get('Том'),
+                                                  pages=p.get('Страницы'),
+                                                  citation=p.get('Цитирования'))
                     publ_model = PublModel.objects.get(id=p1[0].id)
                     publ_model.author.add(author_model)
                     publ_model.save()
@@ -192,12 +230,12 @@ def update_publications(request, author_id):
                         conf_model = ConfModel.objects.get(id=c1[0].id)
                         type_model = TypeModel.objects.get(id=3)
                     p1 = PublModel(id=publ_model.id,
-                                title=str(p.get('Название')).capitalize(),
-                                year=p.get('Дата публикации')[0:4],
-                                number=p.get('Номер'),
-                                volume=p.get('Том'),
-                                pages=p.get('Страницы'),
-                                citation=p.get('Цитирования'))
+                                   title=str(p.get('Название')).capitalize(),
+                                   year=p.get('Дата публикации')[0:4],
+                                   number=p.get('Номер'),
+                                   volume=p.get('Том'),
+                                   pages=p.get('Страницы'),
+                                   citation=p.get('Цитирования'))
                     if p.get('Журнал') is not None:
                         journal_model.publication_set.add(p1, bulk=False)
                         type_model.publication_set.add(p1, bulk=False)
@@ -258,12 +296,12 @@ def update_publications(request, author_id):
                     conf_model = ConfModel.objects.get(id=conf_model.id)
                     type_model = TypeModel.objects.get(id=3)
                 p1 = PublModel(id=publ_model.id,
-                            title=str(p.get('Название')).capitalize(),
-                            year=p.get('Дата публикации')[0:4],
-                            number=p.get('Номер'),
-                            volume=p.get('Том'),
-                            pages=p.get('Страницы'),
-                            citation=p.get('Цитирования'))
+                               title=str(p.get('Название')).capitalize(),
+                               year=p.get('Дата публикации')[0:4],
+                               number=p.get('Номер'),
+                               volume=p.get('Том'),
+                               pages=p.get('Страницы'),
+                               citation=p.get('Цитирования'))
                 if p.get('Журнал') is not None:
                     journal_model.publication_set.add(p1, bulk=False)
                     type_model.publication_set.add(p1, bulk=False)
@@ -281,9 +319,10 @@ def update_publications(request, author_id):
         except:
             pass
 
-    publ_model = PublModel.objects.filter(title = '')
+    publ_model = PublModel.objects.filter(title='')
     publ_model.delete()
     return HttpResponseRedirect(reverse('index'))
+
 
 def export_to_excel(request, author_id):
     publ_model = PublModel.objects.filter(author=author_id)

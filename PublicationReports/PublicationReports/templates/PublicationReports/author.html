@@ -27,23 +27,66 @@
 
 {% else %}
 
-{% bootstrap_label authors.name %}
-<br>{% bootstrap_label authors.job %}
-<br>{% bootstrap_label authors.departament.name %}
-<br>{% bootstrap_label 'Всего публикаций в журналах:' %}
-<br>{% bootstrap_label 'Всего публикаций в книгах:' %}
-<br>{% bootstrap_label 'Всего материалов конференций:' %}
-<br>{% bootstrap_label 'Публикаций в текущем году:' %}
-<br>{% bootstrap_label 'Публикаций в предыдущем году:' %}
-<br>{% bootstrap_label 'Самый публикуемый год:' %}
+<table>
+    <tr><h4>{% bootstrap_label content=authors.name %}</h4></tr>
+    <h6>{% bootstrap_label authors.job %}</h6>
+    <h6>{% bootstrap_label authors.departament.name %}</h6>
+    <form action="{% url 'export_to_excel' author_id %}" method="get">
+        {% bootstrap_button button_type="submit" content="Выгрузить в Excel" %}
+    </form>
+</table>
 
-<form action="{% url 'export_to_excel' author_id %}" method="get">
-    {% bootstrap_button button_type="submit" content="Выгрузить в Excel" %}
-</form>
+<table class="table">
+    <thead>
+    <tr align="center">
+        <th>Всего публикаций в журналах</th>
+        <th>Всего публикаций в книгах</th>
+        <th>Всего материалов конференций</th>
+        <th>Индекс хирша (h-индекс)</th>
+        <th>Индекс цитирования</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr align="center">
+        <td>{{ num_journals }}</td>
+        <td>{{ num_books }}</td>
+        <td>{{ num_conf }}</td>
+        <td>{{ hindex }}</td>
+        <td>{{ cit_publ.citation__sum }}</td>
+    </tr>
+    </tbody>
+</table>
+
+<canvas id="myChart" width="50" height="9"></canvas>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const ctx = document.getElementById('myChart').getContext('2d');
+    const myChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels : [{% for gr in graph_for_years %}"{{ gr.year }}",{% endfor %}],
+            datasets: [{
+              label: "Количество публикаций в разрезе года",
+              data : [{% for gr in graph_for_years %}{{ gr.count_publ }},{% endfor %}],
+              backgroundColor: 'rgba(13, 110, 253, 1)',
+              borderColor: 'rgba(13, 110, 253, 1)',
+              borderWidth: 0
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+</script>
 
 {% endif %}
 
 <table class="table">
+    <thead>
     <tr align="center">
         <th>№</th>
         <th>Название</th>
@@ -58,7 +101,9 @@
         <th>Издатель</th>
         <th></th>
     </tr>
-    <tr>
+    </thead>
+    <tbody>
+    <tr align="center">
         {% for p in publications %}
         <td>{{ forloop.counter }}</td>
         <td>{{ p.title }}</td>
@@ -105,9 +150,10 @@
                 <img src="/static/img/edit_icon.png" class="img-fluid" alt="Edit"></a>
             {% endif %}
         </td>
-    <tr>{% endfor %}
+    <tr align="center">{% endfor %}
         <br>
     </tr>
+    </tbody>
 </table>
 
 {% endblock body_content %}
