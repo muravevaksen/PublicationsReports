@@ -91,10 +91,15 @@ def view_author(request, author_id):
         cit_publ = PublModel.objects.filter(author=author_id)
         cit_publ = cit_publ.aggregate(Sum("citation"))
 
-        # График по годам
+        # График кол-во публикаций по годам
         graph_for_years = PublModel.objects.filter(author=author_id, year__range=[2000, 2100])
         graph_for_years = graph_for_years.values('year').annotate(count_publ=Count('id')).values('year', 'count_publ')
         graph_for_years = graph_for_years.order_by('year')
+
+        # График цитирований публикаций по годам
+        graph_cit_for_years = PublModel.objects.filter(author=author_id, year__range=[2000, 2100])
+        graph_cit_for_years = graph_cit_for_years.values('year').annotate(Sum("citation"))
+        graph_cit_for_years = graph_cit_for_years.order_by('year')
 
         return TemplateResponse(request,
                                 template_name,
@@ -107,7 +112,8 @@ def view_author(request, author_id):
                                          'num_conf': num_conf,
                                          'hindex': h,
                                          'cit_publ': cit_publ,
-                                         'graph_for_years': graph_for_years})
+                                         'graph_for_years': graph_for_years,
+                                         'graph_cit_for_years': graph_cit_for_years})
     elif request.method == 'POST':
         if 'delete_author' in request.POST:
             author_model.delete()

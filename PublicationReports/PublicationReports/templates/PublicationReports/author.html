@@ -57,11 +57,23 @@
     </tbody>
 </table>
 
-<canvas id="myChart" width="50" height="9"></canvas>
+<table>
+    <tbody>
+    <tr>
+        <td>
+            <canvas id="graph_for_years" width="750" height="200"></canvas>
+        </td>
+        <td>
+            <canvas id="graph_cit_for_years" width="750" height="200"></canvas>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    const ctx = document.getElementById('myChart').getContext('2d');
-    const myChart = new Chart(ctx, {
+    const ctx1 = document.getElementById('graph_for_years').getContext('2d');
+    const graph_for_years = new Chart(ctx1, {
         type: 'bar',
         data: {
           labels : [{% for gr in graph_for_years %}"{{ gr.year }}",{% endfor %}],
@@ -83,6 +95,29 @@
     });
 </script>
 
+<script>
+    const ctx2 = document.getElementById('graph_cit_for_years').getContext('2d');
+    const graph_cit_for_years = new Chart(ctx2, {
+        type: 'bar',
+        data: {
+          labels : [{% for gr in graph_cit_for_years %}"{{ gr.year }}",{% endfor %}],
+            datasets: [{
+              label: "Количество цитирований в разрезе года",
+              data : [{% for gr in graph_cit_for_years %}{{ gr.citation__sum }},{% endfor %}],
+              backgroundColor: 'rgba(13, 110, 253, 1)',
+              borderColor: 'rgba(13, 110, 253, 1)',
+              borderWidth: 0
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+</script>
 {% endif %}
 
 <table class="table">
