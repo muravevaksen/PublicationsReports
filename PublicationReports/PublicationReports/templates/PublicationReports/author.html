@@ -9,16 +9,16 @@
 <form method="post">
     {% bootstrap_form form %}
     {% csrf_token %}
-    {% bootstrap_button button_type="submit" content="Сохранить изменения" %}
-    {% bootstrap_button button_type="submit" name="delete_author" content="Удалить автора" %}
+    {% bootstrap_button button_class="btn btn-secondary" button_type="submit" content="Сохранить изменения" %}
+    {% bootstrap_button button_class="btn btn-secondary" button_type="submit" content="Удалить автора" name="delete_author" %}
 </form>
 
 <form action="{% url 'create_publication' author_id %}" method="get">
-    {% bootstrap_button button_type="submit" content="Добавить публикацию" %}
+    {% bootstrap_button button_class="btn btn-secondary" button_type="submit" content="Добавить публикацию" %}
 </form>
 
 <form action="{% url 'update_publications' author_id %}" method="get">
-    {% bootstrap_button button_type="submit" content="Обновить публикации" %}
+    {% bootstrap_button button_class="btn btn-secondary" button_type="submit" content="Обновить публикации" %}
 </form>
 
 <form action="{% url 'export_to_excel' author_id %}" method="get">
@@ -56,6 +56,7 @@
     </tr>
     </tbody>
 </table>
+{% endif %}
 
 <table>
     <tbody>
@@ -118,7 +119,6 @@
         }
     });
 </script>
-{% endif %}
 
 <table class="table">
     <thead>
@@ -182,7 +182,7 @@
         <td>
             {% if perms.catalog.can_update_publication %}
             <a href="{% url 'edit_publications' author_id p.id %}">
-                <img src="/static/img/edit_icon.png" class="img-fluid" alt="Edit"></a>
+                <img src="/static/img/edit_icon.png" width="2000" height="2000" class="img-fluid" alt="Edit"></a>
             {% endif %}
         </td>
     <tr align="center">{% endfor %}
