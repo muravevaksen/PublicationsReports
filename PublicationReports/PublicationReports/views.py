@@ -58,6 +58,27 @@ def create_teacher(request):
                                     template_name,
                                     context={'form': author_form})
 
+def h_index(author_id):
+    # Индекс Хирша
+    h_publ = PublModel.objects.filter(author=author_id)
+    h_publ = h_publ.order_by('-citation').values()
+    h_publ = list(h_publ)
+
+    i = 1
+    h = 0
+
+    for p in h_publ:
+        if i >= p.get('citation'):
+            h = p.get('citation')
+            break
+        i += 1
+    return h
+
+def citation_index(author_id):
+    # Индекс цитирования
+    cit_publ = PublModel.objects.filter(author=author_id)
+    cit_publ = cit_publ.aggregate(Sum("citation"))
+    return cit_publ
 
 def view_author(request, author_id):
     template_name = "PublicationReports/author.html"
@@ -74,22 +95,9 @@ def view_author(request, author_id):
         num_conf = len(PublModel.objects.filter(author=author_id, type='3'))
 
         # Индекс Хирша
-        h_publ = PublModel.objects.filter(author=author_id)
-        h_publ = h_publ.order_by('-citation').values()
-        h_publ = list(h_publ)
-
-        i = 1
-        h = 0
-
-        for p in h_publ:
-            if i >= p.get('citation'):
-                h = p.get('citation')
-                break
-            i += 1
-
+        h = h_index(author_id)
         # Индекс цитирования
-        cit_publ = PublModel.objects.filter(author=author_id)
-        cit_publ = cit_publ.aggregate(Sum("citation"))
+        cit_publ = citation_index(author_id)
 
         # График кол-во публикаций по годам
         graph_for_years = PublModel.objects.filter(author=author_id, year__range=[2000, 2100])
@@ -334,23 +342,58 @@ def export_to_excel(request, author_id):
     publ_model = PublModel.objects.filter(author=author_id)
     author_model = AuthorModel.objects.get(id=author_id)
 
-    l2 = publ_model.name
-    l3 = ['1', '2', '3', '4', '8', 8, 8, 9, 9]
-    l4 = ['1', '2', '3', '4', '8', 8, 8, 9, 9]
-    l5 = ['1', '2', '3', '4', '8', 8, 8, 9, 9]
-    l6 = ['1', '2', '3', '4', '8', 8, 8, 9, 9]
-    l7 = ['1', '2', '3', '4', '8', 8, 8, 9, 9]
-    l8 = ['1', '2', '3', '4', '8', 8, 8, 9, 9]
-    l9 = ['1', '2', '3', '4', '8', 8, 8, 9, 9]
-    l10 = ['1', '2', '3', '4', '8', 8, 8, 9, 9]
-    l11 = ['1', '2', '3', '4', '8', 8, 8, 9, 9]
-    l12 = ['1', '2', '3', '4', '8', 8, 8, 9, 9]
-    l13 = ['1', '2', '3', '4', '8', 8, 8, 9, 9]
-    l14 = ['1', '2', '3', '4', '8', 8, 8, 9, 9]
+    list_title = []
+    list_year = []
+    list_number = []
+    list_volume = []
+    list_pages = []
+    list_citation = []
+    list_journal_name = []
+    list_book_name = []
+    list_conference_name = []
+    list_publisher = []
 
-    df_publ = DataFrame({'Название': l2, 'Год': l3, 'Номер': l4, 'Том': l5, 'Страницы': l6,
-                         'Цитирования': l7, 'Журнал': l8, 'Книга': l9, 'Конференция': l11, 'Издатель': l12})
-    df_statictics = DataFrame({'Всего': l13, 'Всего журналов': l14})
+    for p in publ_model:
+        list_title.append(p.title)
+        list_year.append(p.year)
+        list_number.append(p.number)
+        list_volume.append(p.volume)
+        list_pages.append(p.pages)
+        list_citation.append(p.citation)
+        try:
+            list_journal_name.append(p.journal.name)
+        except:
+            list_journal_name.append('-')
+        try:
+            list_book_name.append(p.book.name)
+        except:
+            list_book_name.append('-')
+        try:
+            list_conference_name.append(p.conference.name)
+        except:
+            list_conference_name.append('-')
+        try:
+            list_publisher.append(p.journal.publisher)
+        except:
+            list_publisher.append('-')
+
+    # Показатели
+    num_journals = len(PublModel.objects.filter(author=author_id, type='1'))
+    num_books = len(PublModel.objects.filter(author=author_id, type='2'))
+    num_conf = len(PublModel.objects.filter(author=author_id, type='3'))
+    h = h_index(author_id)
+    cit = citation_index(author_id)
+
+    df_publ = DataFrame({'Название': list_title, 'Год': list_year, 'Номер': list_number,
+                         'Том': list_volume, 'Страницы': list_pages, 'Цитирования': list_citation,
+                         'Журнал': list_journal_name, 'Книга': list_book_name, 'Конференция': list_conference_name,
+                         'Издатель': list_publisher})
+
+    df_statictics = DataFrame({'Всего публикаций в журналах	': [num_journals],
+                               'Всего публикаций в книгах': [num_books],
+                               'Всего материалов конференций': [num_conf],
+                               'h-индекс': [h],
+                               'Индекс цитирования': [cit.get("citation__sum")]})
 
     with pandas.ExcelWriter(f'Публикации_{author_model.name}.xlsx') as writer:
         df_publ.to_excel(writer, sheet_name='Публикации', index=False)

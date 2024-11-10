@@ -32,7 +32,7 @@
     <h6>{% bootstrap_label authors.job %}</h6>
     <h6>{% bootstrap_label authors.departament.name %}</h6>
     <form action="{% url 'export_to_excel' author_id %}" method="get">
-        {% bootstrap_button button_type="submit" content="Выгрузить в Excel" %}
+        {% bootstrap_button button_class="btn btn-secondary" button_type="submit" content="Выгрузить в Excel" %}
     </form>
 </table>
 
@@ -80,8 +80,8 @@
             datasets: [{
               label: "Количество публикаций в разрезе года",
               data : [{% for gr in graph_for_years %}{{ gr.count_publ }},{% endfor %}],
-              backgroundColor: 'rgba(13, 110, 253, 1)',
-              borderColor: 'rgba(13, 110, 253, 1)',
+              backgroundColor: 'rgba(138, 0, 128, 1)',
+              borderColor: 'rgba(128, 0, 128, 1)',
               borderWidth: 0
             }]
         },
@@ -104,8 +104,8 @@
             datasets: [{
               label: "Количество цитирований в разрезе года",
               data : [{% for gr in graph_cit_for_years %}{{ gr.citation__sum }},{% endfor %}],
-              backgroundColor: 'rgba(13, 110, 253, 1)',
-              borderColor: 'rgba(13, 110, 253, 1)',
+              backgroundColor: 'rgba(128, 0, 128, 1)',
+              borderColor: 'rgba(128, 0, 128, 1)',
               borderWidth: 0
             }]
         },

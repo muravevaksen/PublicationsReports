@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-    {% load bootstrap5 %}
-    {% bootstrap_css %}
-    {% bootstrap_javascript %}
-    {% load static %}
+{% load bootstrap5 %}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+{% load static %}
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -10,10 +10,20 @@
 </head>
 <body>
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <style>
+   .transparent50 {
+    filter: alpha(Opacity=50);
+    opacity: 0.50;
+   }
+  </style>
+
+<nav class="p-2 mb-2 navbar navbar-expand-lg navbar-light bg-light">
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mr-auto">
-            <li class="nav-item active">
+            <li class="nav-item ">
+            <a class="navbar-brand" href=""><img src="/static/img/main_icon.png" width="40" height="40" class="transparent50"></a>
+            </li>
+            <li class="nav-item">
                 <a class="nav-link" href="/">Преподаватели</a>
             </li>
             <li class="nav-item">
@@ -24,15 +34,15 @@
     <form class="form-inline">
         <ul class="navbar-nav mr-auto">
             {% if user.is_authenticated %}
-            <b class="nav-link link-light"> {{ user.get_username }}</b>
-            <a class="btn btn-outline-light my-2 my-sm-0" href="/accounts/logout?next={{ request.path }}">Выйти</a>
+            <b class="nav-link link-light transparent50"> {{ user.get_username }}</b>
+            <a class="btn btn-outline-dark my-2 my-sm-0 transparent50" href="/accounts/logout?next={{ request.path }}">Выйти</a>
             {% else %}
-            <a class="btn btn-outline-light my-2 my-sm-0" href="/accounts/login?next={{ request.path }}">Войти</a>
+            <a class="btn btn-outline-dark my-2 my-sm-0 transparent50" href="/accounts/login?next={{ request.path }}">Войти</a>
             {% endif %}
         </ul>
     </form>
 </nav>
-<div class="p-3 mb-2 bg-light text-dark">
+<div class="p-3 mb-2">
     {% block body_content %}
     {% endblock body_content %}
     {% block content %}

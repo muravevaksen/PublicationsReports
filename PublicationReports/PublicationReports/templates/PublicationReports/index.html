@@ -21,12 +21,12 @@
     <tbody>
     {% for p in publ_count %}
     <tr align="center">
-        <td><a class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover"
+        <td><a class="link-dark link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover"
                href="{% url 'view_author' p.pk %}">{{ p.name }}</a></td>
         <td>{{ p.job }}</td>
         <td>{{ p.departament }}</td>
         <td>
-            <center> {{ p.num_publ }}</center>
+            {{ p.num_publ }}
         </td>
     </tr>
     {% endfor %}
@@ -44,8 +44,8 @@
             datasets: [{
               label: "Общее количество публикаций",
               data : [{% for p in publ_count %}{{ p.num_publ }},{% endfor %}],
-              backgroundColor: 'rgba(13, 110, 253, 1)',
-              borderColor: 'rgba(13, 110, 253, 1)',
+              backgroundColor: 'rgba(128, 0, 128, 1)',
+              borderColor: 'rgba(128, 128, 0, 1)',
               borderWidth: 0
             }]
         },
