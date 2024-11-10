@@ -33,8 +33,9 @@
 <br>{% bootstrap_label 'Всего публикаций в журналах:' %}
 <br>{% bootstrap_label 'Всего публикаций в книгах:' %}
 <br>{% bootstrap_label 'Всего материалов конференций:' %}
+<br>{% bootstrap_label 'Публикаций в текущем году:' %}
+<br>{% bootstrap_label 'Публикаций в предыдущем году:' %}
 <br>{% bootstrap_label 'Самый публикуемый год:' %}
-<br>{% bootstrap_label 'Самый публикуемый журнал:' %}
 
 <form action="{% url 'export_to_excel' author_id %}" method="get">
     {% bootstrap_button button_type="submit" content="Выгрузить в Excel" %}

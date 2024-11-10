@@ -11,11 +11,11 @@
 
 <table class="table">
     <thead>
-    <tr>
-        <th><center>ФИО</center></th>
-        <th><center>Место работы</center></th>
-        <th><center>Кафедра</center></th>
-        <th><center>Количество публикаций</center></th>
+    <tr align="center">
+        <th>ФИО</th>
+        <th>Место работы</th>
+        <th>Кафедра</th>
+        <th>Количество публикаций</th>
     </tr>
     </thead>
     <tbody>
@@ -33,17 +33,17 @@
     </tbody>
 </table>
 
-<canvas id="myChart" width="50" height="10"></canvas>
+<canvas id="myChart" width="50" height="9"></canvas>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     const ctx = document.getElementById('myChart').getContext('2d');
     const myChart = new Chart(ctx, {
         type: 'bar',
         data: {
-          labels : [{% for a in authors %}"{{ a.name }}",{% endfor %}],
+          labels : [{% for p in publ_count %}"{{ p.name }}",{% endfor %}],
             datasets: [{
               label: "Количество публикаций преподавателя",
-              data : [{% for p in pcount %}{{ p }},{% endfor %}],
+              data : [{% for p in publ_count %}{{ p.num_publ }},{% endfor %}],
               backgroundColor: 'rgba(75, 192, 192, 0.2)',
               borderColor: 'rgba(75, 192, 192, 1)',
               borderWidth: 1

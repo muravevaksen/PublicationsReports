@@ -28,22 +28,10 @@ def index(request):
     author_model = AuthorModel.objects.all()
     # считаем количество публикаций каждого автора
     publ_count = AuthorModel.objects.annotate(num_publ=Count("publication"))
-    # подготавливаем данные для вывода
-    id_author = [x.id for x in author_model]
-    name = [x.name for x in author_model]
-    depart = [x.departament for x in author_model]
-    pcount = [str(x.num_publ) for x in publ_count]
-    #pcount.reverse()  # обратная сортировочка
-    #breakpoint()
     return TemplateResponse(request,
                             'PublicationReports/index.html',
                             context={'authors': author_model,
-                                     'id_author': id_author,
-                                     'name': name,
-                                     'depart': depart,
-                                     'pcount': pcount,
                                      'publ_count': publ_count})
-
 
 @user_passes_test(check_is_personal)
 def create_teacher(request):
@@ -293,6 +281,8 @@ def update_publications(request, author_id):
         except:
             pass
 
+    publ_model = PublModel.objects.filter(title = '')
+    publ_model.delete()
     return HttpResponseRedirect(reverse('index'))
 
 def export_to_excel(request, author_id):
