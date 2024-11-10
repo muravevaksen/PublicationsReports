@@ -8,7 +8,7 @@
 <form method="post">
     {% csrf_token %}
     {% bootstrap_form form %}
-    {% bootstrap_button content="Добавить" button_type="submit" %}
+    {% bootstrap_button button_class="btn btn-secondary" button_type="submit" content="Добавить преподавателя" %}
 </form>
 
 {% else %}

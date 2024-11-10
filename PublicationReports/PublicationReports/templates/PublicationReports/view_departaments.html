@@ -21,7 +21,7 @@
         {% for d in departaments %}
         <td>{{ forloop.counter }}</td>
         <td>{{ d.name }}</td>
-        <td>сотруднички</td>
+        <td>сотрудники</td>
         <td>
             {% if perms.catalog.can_update_publication %}
             <a href="{% url 'edit_departaments' d.id %}">
