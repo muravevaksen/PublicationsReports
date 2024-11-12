@@ -30,10 +30,15 @@ def index(request):
     author_model = AuthorModel.objects.all()
     # считаем количество публикаций каждого автора
     publ_count = AuthorModel.objects.annotate(num_publ=Count("publication"))
+    # считаем количество публикаций по годам
+    publ_count_by_year = PublModel.objects.values('year').annotate(Count('id'))
+    publ_count_by_year =  publ_count_by_year.order_by('year')
+
     return TemplateResponse(request,
                             'PublicationReports/index.html',
                             context={'authors': author_model,
-                                     'publ_count': publ_count})
+                                     'publ_count': publ_count,
+                                     'publ_count_by_year': publ_count_by_year})
 
 
 @user_passes_test(check_is_personal)
@@ -58,6 +63,7 @@ def create_teacher(request):
                                     template_name,
                                     context={'form': author_form})
 
+
 def h_index(author_id):
     # Индекс Хирша
     h_publ = PublModel.objects.filter(author=author_id)
@@ -74,11 +80,13 @@ def h_index(author_id):
         i += 1
     return h
 
+
 def citation_index(author_id):
     # Индекс цитирования
     cit_publ = PublModel.objects.filter(author=author_id)
     cit_publ = cit_publ.aggregate(Sum("citation"))
     return cit_publ
+
 
 def view_author(request, author_id):
     template_name = "PublicationReports/author.html"
@@ -435,12 +443,17 @@ def edit_publications(request, author_id, publ_id):
 def view_departaments(request):
     template_name = "PublicationReports/view_departaments.html"
     depart_model = DepartModel()
+    departament_model = DepartModel.objects.all()
+    author_model = AuthorModel.objects.all()
+    count_publ = AuthorModel.objects.values('departament').annotate(num_publ=Count("publication"))
     if request.method == 'GET':
         depart_form = DepartForm(instance=depart_model)
         return TemplateResponse(request,
                                 template_name,
                                 context={'form': depart_form,
-                                         'departaments': DepartModel.objects.all()})
+                                         'departaments': departament_model,
+                                         'authors': author_model,
+                                         'count_publ': count_publ})
 
 
 @user_passes_test(check_is_personal)

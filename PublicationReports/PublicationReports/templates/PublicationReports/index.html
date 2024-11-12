@@ -7,7 +7,7 @@
 {% if perms.catalog.can_add_teacher %}
 <form action="{% url 'create_teacher' %}" method="get">
     {% csrf_token %}
-        {% bootstrap_button button_class="btn btn-secondary" button_type="submit" content="Добавить преподавателя" %}
+    {% bootstrap_button button_class="btn btn-secondary" button_type="submit" content="Добавить преподавателя" %}
 </form>
 {% endif %}
 
@@ -35,17 +35,53 @@
     </tbody>
 </table>
 
-<canvas id="myChart" width="50" height="9"></canvas>
+<table>
+    <tbody>
+    <tr align="center">
+        <td>
+            <canvas id="graph" width="700" height="250"></canvas>
+        </td>
+        <td>
+            <canvas id="graph_for_years" width="700" height="200"></canvas>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    const ctx = document.getElementById('myChart').getContext('2d');
-    const myChart = new Chart(ctx, {
+    const ctx1 = document.getElementById('graph').getContext('2d');
+    const graph = new Chart(ctx1, {
         type: 'bar',
         data: {
           labels : [{% for p in publ_count %}"{{ p.name }}",{% endfor %}],
             datasets: [{
-              label: "Общее количество публикаций",
+              label: "Общее количество публикаций по преподавателям",
               data : [{% for p in publ_count %}{{ p.num_publ }},{% endfor %}],
+              backgroundColor: 'rgba(128, 0, 128, 1)',
+              borderColor: 'rgba(128, 128, 0, 1)',
+              borderWidth: 0
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+</script>
+<script>
+    const ctx2 = document.getElementById('graph_for_years').getContext('2d');
+    const graph_for_years = new Chart(ctx2, {
+        type: 'bar',
+        data: {
+          labels : [{% for p in publ_count_by_year %}{% if p.year > 2000 %}"{{ p.year }}",{% endif %}{% endfor %}],
+            datasets: [{
+              label: "Общее количество публикаций по годам",
+              data : [{% for p in publ_count_by_year %}{% if p.year > 2000 %}{{ p.id__count }},
+              {% endif %}{% endfor %}],
               backgroundColor: 'rgba(128, 0, 128, 1)',
               borderColor: 'rgba(128, 128, 0, 1)',
               borderWidth: 0

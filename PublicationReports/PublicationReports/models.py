@@ -41,7 +41,7 @@ class Author(models.Model):
         return f'{self.name} ({self.departament})'
 
     class Meta:
-        ordering = ['job', 'departament', 'name']
+        ordering = ['departament', 'name']
         permissions = (("can_add_teacher", "add teacher"), ("can_update_teacher", "update teacher"),)
 
 class TypeOfPublication(models.Model):

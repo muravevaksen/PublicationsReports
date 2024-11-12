@@ -6,23 +6,33 @@
 
 {% if perms.catalog.can_update_teacher %}
 
+<table>
+    <tbody>
+    <tr>
+        <td>
+            <form action="{% url 'create_publication' author_id %}" method="get">
+                {% bootstrap_button button_class="btn btn-secondary" button_type="submit" content="Добавить публикацию" %}
+            </form>
+        </td>
+        <td>
+            <form action="{% url 'update_publications' author_id %}" method="get">
+                {% bootstrap_button button_class="btn btn-secondary" button_type="submit" content="Обновить публикации" %}
+            </form>
+        </td>
+        <td>
+            <form action="{% url 'export_to_excel' author_id %}" method="get">
+                {% bootstrap_button button_class="btn btn-secondary" button_type="submit" content="Генерация отчета" %}
+            </form>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
 <form method="post">
     {% bootstrap_form form %}
     {% csrf_token %}
     {% bootstrap_button button_class="btn btn-secondary" button_type="submit" content="Сохранить изменения" %}
     {% bootstrap_button button_class="btn btn-secondary" button_type="submit" content="Удалить автора" name="delete_author" %}
-</form>
-
-<form action="{% url 'create_publication' author_id %}" method="get">
-    {% bootstrap_button button_class="btn btn-secondary" button_type="submit" content="Добавить публикацию" %}
-</form>
-
-<form action="{% url 'update_publications' author_id %}" method="get">
-    {% bootstrap_button button_class="btn btn-secondary" button_type="submit" content="Обновить публикации" %}
-</form>
-
-<form action="{% url 'export_to_excel' author_id %}" method="get">
-    {% bootstrap_button button_class="btn btn-secondary" button_type="submit" content="Генерация отчета" %}
 </form>
 
 {% else %}

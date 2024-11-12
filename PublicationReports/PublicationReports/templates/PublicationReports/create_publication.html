@@ -8,7 +8,7 @@
 <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
     {% bootstrap_form form %}
-    {% bootstrap_button content="Добавить" button_type="submit" %}
+    {% bootstrap_button button_class="btn btn-secondary" content="Добавить публикацию" button_type="submit" %}
 </form>
 
 {% else %}

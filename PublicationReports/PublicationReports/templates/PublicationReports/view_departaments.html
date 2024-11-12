@@ -6,31 +6,80 @@
 
 {% if perms.catalog.can_update_teacher %}
 <form action="{% url 'create_departament' %}" method="get">
-    {% bootstrap_button button_type="submit" content="Добавить кафедру" %}
+    {% bootstrap_button button_class="btn btn-secondary" button_type="submit" content="Добавить кафедру" %}
 </form>
 {% endif %}
 
-<table>
-    <tr>
+<table class="table">
+    <thead>
+    <tr align="center">
+        <th>№</th>
         <th>Кафедра</th>
         <th>Сотрудники</th>
-        <th>Количество публикаций</th>
+        <th>Общее количество публикаций</th>
         <th></th>
     </tr>
-    <tr>
+    </thead>
+    <tbody>
+    <tr align="center">
         {% for d in departaments %}
         <td>{{ forloop.counter }}</td>
         <td>{{ d.name }}</td>
-        <td>сотрудники</td>
+        <td>{% for a in authors %}
+            {% if a.departament == d %}
+            {{ a.name }}
+            <br>
+            {% endif %}
+            {% endfor %}
+        </td>
+        <td>{% for cp in count_publ %}
+            {% if cp.departament == d.id %}
+            {{ cp.num_publ }}
+            {% endif %}
+            {% endfor %}
+        </td>
         <td>
             {% if perms.catalog.can_update_publication %}
             <a href="{% url 'edit_departaments' d.id %}">
-                <img src="/static/img/edit_icon.png" class="img-fluid" alt="Edit"></a>
+                <img src="/static/img/edit_icon.png" class="img-fluid" width="25" height="25" alt="Edit"></a>
             {% endif %}
         </td>
-    <tr>{% endfor %}
-        <br>
-    </tr>
+    <tr align="center">{% endfor %}</tr>
+    </tbody>
 </table>
+
+<canvas id="graph_for_years" width="750" height="150"></canvas>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const ctx1 = document.getElementById('graph_for_years').getContext('2d');
+    const graph_for_years = new Chart(ctx1, {
+        type: 'bar',
+        data: {
+          labels : [{% for d in departaments %}"{{ d }}",{% endfor %}],
+            datasets: [{
+              label: "Количество публикаций в разрезе года",
+              data : [
+              {% for d in departaments %}
+              {% for cp in count_publ %}
+              {% if cp.departament == d.id %}
+              {{ cp.num_publ }},
+              {% endif %}
+              {% endfor %}
+              {% endfor %}
+              ],
+              backgroundColor: 'rgba(138, 0, 128, 1)',
+              borderColor: 'rgba(128, 0, 128, 1)',
+              borderWidth: 0
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+</script>
 
 {% endblock body_content %}
